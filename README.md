@@ -1,110 +1,82 @@
-Arcade Lykon – Garuda Vision Proposal 
+# Arcade Lykon – Garuda Vision Proposal
 
-Introduction
-Garuda Vision is a native intelligence layer built into Lykon that goes beyond encrypted connections to evaluate whether a URL can actually be trusted analysing domain structure, brand signals, and page content in real time before and after a page loads. Where every browser today answers "is this connection secure?", Garuda Vision answers the harder question: "is this destination safe?"
+## Introduction
 
-The modern web has a trust problem. Today's browsers are designed to verify whether a connection is secure  not whether a destination is safe. These are two fundamentally different questions, and the gap between them is where millions of users get deceived every year.Garuda Vision is a proposed native browser intelligence layer for Lykon that bridges this gap by evaluating whether a URL can actually be trusted  before the user ever lands on the page.
+Garuda Vision is a proposed native intelligence layer for Lykon that goes beyond encrypted connections to determine whether a URL can actually be trusted. By analyzing domain structures, brand signals, and page content in real time — both before and after a page loads — Garuda Vision addresses a critical limitation in modern browser security.
 
-The Problem
-When a browser displays a padlock icon, it confirms one thing only: the data travelling between your device and the server is encrypted. It says nothing about who is on the other end. Attackers have long understood this. A phishing page hosted at googleauthlogin.vercel.app gets the same padlock as google.com  because the encryption is real, even if the intent is criminal.
+Today’s browsers answer the question:
 
-Current browser security relies heavily on blocklists  databases of known malicious domains. The fundamental flaw is timing. A phishing site is typically live for only a few hours, harvests credentials, and disappears before it ever makes it onto a blocklist. The attack succeeds before the defence even activates.
+> “Is this connection secure?”
 
-A note on scope. The phishing examples used throughout this document frequently reference free hosting platforms such as vercel.app and netlify.app because they represent the fastest-growing and currently least-defended attack vector not because Garuda Vision is limited to detecting them. The system evaluates trust signals across the entire web regardless of domain extension. A homoglyph attack on a .com domain, a credential-harvesting page on a .in domain, and a brand impersonation page on a .co domain are all within scope and are all caught by the same detection layers described in this proposal. The platform examples are a window into the problem, not the boundary of it.
+Garuda Vision is designed to answer the more important question:
 
+> “Is this destination safe?”
 
+The modern web faces a growing trust problem. Current browsers are primarily built to verify whether a connection is encrypted, not whether the destination itself is legitimate. These are fundamentally different concerns, and the gap between them is where millions of users are deceived every year.
 
-Example with reference 
+Garuda Vision aims to bridge this gap by introducing native browser intelligence capable of evaluating trust signals before a user fully interacts with a webpage.
 
+---
 
+## The Problem
 
-The image above is not a Google login page. It is a phishing site  and your browser has no idea.
+When a browser displays a padlock icon, it confirms only one thing:
 
-Look at the address bar. The URL reads verificationforgoogleform.vercel.app. The page looks identical to Google's official Sign-In screen  same logo, same dark theme, same input field, same blue Next button. A normal user, especially one who was redirected here through a suspicious email or link, would type their email and password without a second thought. Their credentials would be gone in seconds.
+* The connection between the user and the server is encrypted.
 
-This is precisely the attack vector that Garuda Vision is designed to intercept.
+It does **not** verify:
 
-The browser in this screenshot, a modern, fully updated browser  shows zero warnings. No red address bar. No interstitial page. No flag of any kind. This is because the browser is doing its job correctly by its own definition. The connection is encrypted. The domain has not yet appeared on any blocklist. By every metric the browser currently measures, this page is clean.
+* Who operates the website
+* Whether the destination is legitimate
+* Whether the page is attempting to impersonate a trusted brand
 
-But the signals of deception are hiding in plain sight. The word google appears in the URL, yet the actual registered domain is vercel.app, a free developer hosting platform. Google does not host its authentication infrastructure on Vercel. No major company does. The URL also clusters three high-risk keywords together verification, google, and forms a pattern consistent with credential harvesting pages across thousands of documented phishing campaigns.
+Attackers have exploited this weakness for years. A phishing page hosted at:
 
-Garuda Vision would catch every one of these signals before the page even loads, warning the user that something is wrong  not because this domain is on a list, but because the URL itself does not make sense for what it is claiming to be.
-This is the gap. This image is the proof.
+`googleauthlogin.vercel.app`
 
+can display the same padlock icon as:
 
+`google.com`
 
-Garuda Vision  Detailed Technical Solution
-The Core Philosophy
-Garuda Vision does not wait for a domain to be reported. It analyses intent from the URL structure and page content in real time, using a layered flag system that combines local intelligence with cloud-backed data  without overwhelming system resources.
-Layer 1  The Filter List Engine
-At the foundation, Garuda Vision maintains a structured filter list  similar in concept to how ad blockers operate, but purpose-built for trust detection rather than element hiding. This list is divided into three categories: confirmed safe domains, confirmed malicious domains, and pattern-based suspicious rules. Every URL the browser navigates to is checked against this list first, before any network request is made to the page itself. The check is local, instant, and costs virtually no memory.
-The safe list is pre-populated with the top popular websites  Google, YouTube, Amazon, Facebook, PayPal, and thousands more  so that everyday browsing never triggers unnecessary analysis. This is a deliberate design decision to prevent RAM overuse. If a domain is on the safe list, Garuda Vision exits immediately and places zero load on the system. The heavy analysis only activates when a URL is unknown or suspicious.
-Layer 2  The Two-Flag Detection System
-When a URL is not on the safe list, Garuda Vision evaluates it using two independent flags that can operate separately or combine for a higher threat rating.
-Flag A  URL Analysis is always active. The moment a URL is typed or a link is clicked, Garuda Vision analyses the raw URL string before the page loads. It checks for brand names appearing outside their legitimate domains, suspicious keyword clusters such as login, verify, account, password combined with brand names, free hosting platforms carrying brand-impersonation patterns, and Unicode characters in the domain that are visually identical to Latin letters. Unicode homoglyph detection is disabled by default in the address bar input to avoid false positives when users are simply typing, but activates the moment a URL is submitted for navigation.
-Flag B  Web Content Analysis activates after the page loads, but only if Flag A has already raised a suspicion signal. It does not run on every page  that would be wasteful and slow. When triggered, it scans the visible page content: the page title, logo assets, form fields asking for credentials, and the overall visual structure. If the page is visually presenting itself as a brand that does not match the actual domain, both flags are true simultaneously. A dual-flag match is treated as high confidence phishing and triggers a full interstitial warning, blocking the page until the user explicitly chooses to proceed.
-This two-flag architecture means Garuda Vision never slows down normal browsing. For the vast majority of users on known safe sites, it is completely invisible. It only speaks when both the URL and the page content are telling contradictory stories.
-Layer 3  The Living Safe List
-The safe list is not static. Garuda Vision grows it through three mechanisms working together.
-First, popular sites are bundled at install time covering the top sites globally, so from day one the system is not re-analysing Google every time a user opens a new tab. Second, user site survey data is anonymised and opt-in  feeds back into the system. When millions(rare case lol) of Lykon users visit the same domain repeatedly without ever triggering a phishing report, that domain earns trust weight and gets promoted into the safe list automatically. Third, cloud serving pulls incremental list updates in the background, similar to how antivirus definitions update silently. The browser does not need a full update to receive new safe domains or new malicious pattern rules. The list stays current without the user ever noticing.
-This combination means the RAM footprint stays flat over time. As the safe list grows, the number of URLs that ever reach the deep analysis stage shrinks. The system becomes faster and lighter the more it is used, not heavier.
+because the encryption is genuine — even if the intent behind the page is malicious.
 
+### Limitations of Current Browser Security
 
-FLow Diagram:
+Most browser security systems rely heavily on blocklists: databases containing known malicious domains. The core issue with this model is timing.
 
-THE REAL PROBLEM:
+A typical phishing site:
 
-Problem 1  False Positives Will Damage Trust
-The Problem in Plain Terms
-The most immediate risk to Garuda Vision is not that it fails to catch phishing, it is that it incorrectly blocks legitimate websites. Thousands of real developers and legitimate startups host their applications on Vercel, Netlify, and similar platforms. If Garuda Vision raises a warning every time a user visits a developer's portfolio or a startup's landing page simply because it is hosted on vercel.app, users will lose trust in the browser. They will disable the feature, leave negative reviews, and tell others that Lykon breaks websites. A security feature that users turn off provides zero security.
-The root cause of this risk is treating detection as a binary decision  whether a URL is safe or it is dangerous. Binary decisions made on incomplete information produce false positives at scale.
-The Proposed Solution
-Garuda Vision must never make a single allow or block decision based on one signal. Every URL is evaluated against a set of independent signals and assigned a confidence score between 0 and 100. The score determines the response level, not any individual signal on its own.
-The three response levels are as follows. A score between 0 and 39 produces a silent pass  the user sees nothing and browsing continues normally. A score between 40 and 74 produces a soft caution state: a subtle indicator appears in the address bar, similar to how browsers currently distinguish HTTP from HTTPS, requiring no action from the user but making the elevated risk visible. A score between 75 and 100 produces a hard block; a full interstitial page appears and the user must make an active choice to proceed or go back.
-The signals that contribute to the score, and their respective weights, are as follows. A known brand name appearing in the URL while the actual registered domain does not match that brand contributes 35 points. The domain being hosted on a known free deployment platform such as vercel.app, netlify.app, github.io, or pages.dev contributes 20 points. High-risk keywords in the URL path such as login, verify, account, password, or confirm contribute 15 points each up to a maximum of 30 points. A homoglyph character detected in the domain  a Cyrillic or Greek character substituted for a visually identical Latin character  contributes 40 points. A domain registered within the last 14 days contributes 20 points. Confirmation from the page content analysis layer that brand impersonation is occurring contributes an additional 30 points on top of the URL score.
-A legitimate developer's application at myapp.vercel.app with no brand name and no suspicious keywords achieves a maximum score of 20 points under this model. It produces no warning and causes no friction whatsoever. A phishing page at google-account-verify.vercel.app scores 85 points  35 for the Google brand name, 20 for the Vercel platform, and 30 for the keywords verify and account  triggering a hard block. The gap between a legitimate URL and a malicious one is wide enough to be reliable in practice, and this gap is what makes the false positive risk manageable.
+1. Goes live
+2. Harvests credentials
+3. Disappears within hours
 
-Problem 2  Attackers Will Adapt
-The Problem in Plain Terms
-Any security measure that relies on static patterns can be defeated by changing the pattern. If Garuda Vision's URL analysis depends on detecting brand names in suspicious domains, a phishing operator needs only to stop using brand names in their domains. They register xk92mq4.vercel.app, build an identical Google login page inside it, and distribute it through phishing emails where the call to action is "click here to verify your account." The URL itself contains no brand name, no suspicious keywords, and no homoglyphs. Flag A sees nothing. The attack succeeds.
-This is not a theoretical future concern. It is the natural and rapid response of any financially motivated attacker facing a new detection system. The adaptation timeline is measured in days, not months.
-The Proposed Solution
-Flag A  the URL analysis layer  is the first filter and handles the majority of current phishing patterns cheaply and efficiently. It is not designed to be the last line of defence. The architecture from the beginning must treat Flag B  page content analysis  as the primary long-term detection layer, because Flag B exploits a structural constraint that attackers cannot remove.
-The constraint is this. A phishing page that impersonates a legitimate service cannot function without the visual elements of that service being present on the page. A fake Google login page must display Google branding for the user to believe it is Google. It must contain a password input field for credentials to be captured. It must have a form that submits data to an endpoint controlled by the attacker. If any of these elements are removed, the attack stops working. Flag B analyses exactly these elements.
-The implementation does not require computer vision or screenshot comparison, both of which are computationally expensive and difficult to maintain. Flag B uses structured DOM analysis  reading the page's document object model after it loads to extract specific signals. These signals include brand logo image source URLs being loaded from known brand CDN addresses, a page title that names a brand the actual domain does not belong to, the combination of a password input field with brand name text visible anywhere on the page, a form action endpoint pointing to a domain different from the current domain, and a favicon URL that references a known brand asset while the registered domain belongs to someone else.
-The critical insight is that the attacker cannot clean up these DOM signals without destroying their own page. They can rename the URL to remove brand keywords. They cannot rename their fake Google logo or remove the password field without making the fake page unrecognisable and non-functional. Flag B is resistant to URL-level adaptation because it reads what the page is, not what the URL claims it to be.
-It is honest to acknowledge that highly sophisticated attacks using full-page proxying  where the attacker serves a real-time mirror of the legitimate site through their own domain  would partially defeat Flag B. This document does not claim Garuda Vision defeats all phishing. It claims Garuda Vision defeats the category of mass-market, template-based phishing that accounts for the overwhelming majority of credential theft incidents affecting ordinary users. For that threat model, the Flag A and Flag B architecture is sufficient and maintainable.
+In many cases, the attack succeeds before the domain is ever added to a blocklist. The defense activates only after the damage has already occurred.
 
-Problem 3  The Safe List Is a Maintenance Burden
-The Problem in Plain Terms
-A safe list that ships with the browser and never changes will become stale within weeks. New legitimate services launch daily. Existing services change their domains. Domains that were previously safe become compromised. A manually curated list requires permanent human attention and organisational infrastructure to keep current. For a small team building a browser from scratch, this is an operational commitment that competes directly with building the product itself.
-An inaccurate safe list creates two failure modes. A legitimate site missing from the list triggers unnecessary analysis and potentially unnecessary warnings, damaging user trust. A compromised site remaining on the safe list bypasses all detection entirely, creating a false sense of security.
-The Proposed Solution
-The safe list is designed to maintain itself through three automatic sources that operate without human curation.
-The first source is the bundled baseline. The top ten thousand global domains by traffic are compiled at build time and shipped inside Lykon as a static file. This covers Google, YouTube, Amazon, Facebook, all major banking institutions, all major government domains, and the most visited sites in every country. For the vast majority of everyday browsing this list is sufficient from day one and requires no network access to function.
-The second source is behavioural promotion. When Lykon users visit an unknown domain  one not on the bundled list  and the following conditions are all true: no flags were raised during analysis, no phishing report was ever filed for the domain, the domain has been visited by multiple distinct users across multiple sessions, and the domain has been registered for more than 90 days, then that domain is automatically promoted into the user's local trusted list. No human approves this. The system learns from the collective browsing behaviour of Lykon users, and domains that real people visit normally over time earn trust through demonstrated behaviour rather than manual vetting.
-The third source is cloud delta synchronisation. Rather than replacing the full safe list periodically  which would require downloading a large file and is disruptive  the cloud infrastructure publishes small delta packages containing only the additions and removals since the previous version. These delta packages are typically a few kilobytes in size, download silently in the background when the browser is idle, and require no restart to take effect. The user never interacts with this process.
-The combined result of these three sources is a safe list that grows more accurate over time, requires no permanent human maintenance investment, degrades gracefully when the network is unavailable by falling back to the bundled baseline, and scales automatically as Lykon's user base grows.
-Problem 4  Google Safe Browsing Already Exists
-The Problem in Plain Terms
-A reasonable challenge to Garuda Vision is simply this: Google Safe Browsing is free, it is already integrated into Firefox and Chrome, it catches millions of known phishing sites, and any browser can call its API without building anything. Why build a complex multi-layer detection system when a single API call gives you substantial phishing protection at no cost?
-This is a fair challenge. If Garuda Vision is solving a problem that Safe Browsing already solves, it is wasted engineering effort. The proposal must be specific about what Garuda Vision does that Safe Browsing does not.
-The Proposed Solution
-Garuda Vision does not replace Google Safe Browsing. Lykon integrates Safe Browsing API calls in exactly the same way Firefox does. Every URL is checked against the blocklist. Every confirmed malicious domain is blocked immediately. This base layer is free, effective for known threats, and requires minimal engineering effort to integrate.
-Garuda Vision activates specifically for the category of threats Safe Browsing cannot address by design. Safe Browsing is a reactive system where a domain must be reported, confirmed, and added to the database before it protects anyone. A brand new phishing domain registered this morning is not in Safe Browsing's database. A convincingly named domain on a trusted free platform that has never been reported is not in Safe Browsing's database. A domain using Unicode homoglyphs that has existed for three weeks without being flagged is not in Safe Browsing's database.
-The complete layered stack as proposed is as follows. Layer one is the local safe list of known good domains that exit immediately with zero further processing. Layer two is the Google Safe Browsing API check  known bad domains are blocked immediately. Layer three is Garuda Vision Flag A  unknown URLs are analysed by their structural characteristics. Layer four is Garuda Vision Flag B  URLs that Flag A marks as suspicious have their page content analysed after load.
-Each layer only activates when the previous layer produces no definitive answer. The result is that the vast majority of requests are resolved cheaply by layers one or two, and the computationally heavier Garuda Vision analysis is reserved for the small subset of URLs that existing systems cannot classify. Performance impact is contained precisely because the architecture respects this ordering.
-Problem 5  Two Massive Projects Running in Parallel
-The Problem in Plain Terms
-Lykon does not exist yet as a shipping product. Building a stable Gecko-based browser fork is itself a substantial engineering undertaking  managing the codebase, establishing build infrastructure, creating a functional UI, integrating existing features like ad blocking, and shipping something users can actually run. Simultaneously designing and building a novel browser security intelligence system is a second major project running in parallel with the first.
-The danger is not that either project is impossible. The danger is that attempting both at once creates a situation where neither ships. The browser work gets blocked while security architecture decisions are unresolved. The security architecture work gets blocked while the browser codebase is not stable enough to integrate it into. The project stalls in the middle of both.
-The Proposed Solution
-Garuda Vision is phased across the Lykon development timeline in a sequence where every phase ships something real and no phase is blocked by another. The phases are as follows.
-Phase one is shipping the browser. Stable Gecko fork, functional user interface, ad blocking integration, Google Safe Browsing API. Garuda Vision does not exist in this phase. Lykon ships as a real, usable browser with strong baseline protection. This phase proves the project is real.
-Phase two adds Flag A as a lightweight module. URL string analysis only  no page scanning, no DOM work, no cloud infrastructure. The homoglyph detection and brand-on-free-platform signal. This is two to three weeks of focused development work and delivers Garuda Vision v0.1 inside a working browser with real users generating real data.
-Phase three tunes the confidence scoring thresholds using data from real browsing in phase two. The false positives that theory could not predict will appear in practice. This phase fixes them with evidence rather than assumptions.
-Phase four adds Flag B. The DOM fingerprinting layer activates after Flag A, so its performance impact is limited to the small subset of URLs that Flag A already considers suspicious. Integration is clean because the architecture was designed for it from the beginning.
-Phase five adds the cloud infrastructure  delta list updates, behavioural promotion signals, and the living safe list. By this phase Lykon has users, and the infrastructure is built on top of real usage patterns rather than hypothetical ones.
-If development stops at phase two, Lykon still has a genuine security differentiator that no other browser ships natively. If all five phases complete, Garuda Vision is the most sophisticated URL trust engine ever integrated natively into a browser. Every stopping point produces a real, usable, defensible product.
+---
 
+## Scope of Detection
 
+The phishing examples throughout this proposal frequently reference free hosting platforms such as:
+
+* `vercel.app`
+* `netlify.app`
+
+This is not because Garuda Vision is limited to detecting threats on those platforms. They are highlighted because they currently represent one of the fastest-growing and least-defended attack vectors on the web.
+
+Garuda Vision evaluates trust signals across the entire internet, regardless of domain extension or hosting provider.
+
+Examples within scope include:
+
+* Homoglyph attacks on `.com` domains
+* Credential-harvesting pages on `.in` domains
+* Brand impersonation pages on `.co` domains
+
+All of these threats are analyzed using the same detection layers proposed within Garuda Vision.
+
+The platform examples are intended to illustrate the problem — not define the limits of detection.
+
+---
+
+## Learn More
+
+[Garuda Vision Full Documentation](https://docs.google.com/document/d/1pEkEXVbTcQIA3jZqvhHxFgENFgyUlIzwtaiI4n_St1g/edit?usp=sharing&utm_source=chatgpt.com)
