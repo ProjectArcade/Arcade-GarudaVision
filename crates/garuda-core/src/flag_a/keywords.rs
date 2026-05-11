@@ -4,64 +4,73 @@ pub fn check(url: &str) -> (u8, Vec<String>) {
     let mut reasons = Vec::new();
 
     let critical_keywords = &[
-        ("kyc", 35u8),
-        ("aadhaar", 35),
-        ("aadhar", 35),
-        ("pan", 30),
-        ("wallet", 30),
-        ("recovery", 28),
-        ("seed", 28),
-        ("phrase", 25),
-        ("private", 25),
+        ("recovery", 35u8),
+        ("seed", 35),
+        ("mnemonic", 35),
+        ("wallet", 32),
+        ("private", 30),
+        ("otp", 30),
+        ("kyc", 30),
+        ("aadhaar", 30),
+        ("aadhar", 30),
+        ("pan", 28),
     ];
     
     let high_keywords = &[
-        ("login", 20u8),
-        ("verify", 20),
-        ("password", 20),
-        ("account", 18),
-        ("auth", 18),
-        ("payment", 18),
-        ("banking", 18),
-        ("otp", 18),
-        ("upi", 18),
-        ("refund", 18),
+        ("login", 22u8),
+        ("verify", 22),
+        ("verification", 22),
+        ("auth", 20),
+        ("payment", 20),
+        ("banking", 20),
+        ("netbanking", 20),
+        ("refund", 20),
+        ("billing", 18),
+        ("support", 18),
     ];
     
     let medium_keywords = &[
-        ("confirm", 10u8),
-        ("secure", 10),
-        ("update", 10),
-        ("signin", 10),
-        ("authenticate", 10),
-        ("credential", 10),
+        ("confirm", 12u8),
+        ("secure", 12),
+        ("update", 12),
+        ("signin", 12),
+        ("authenticate", 12),
+        ("credential", 12),
+        ("upgrade", 12),
+        ("premium", 12),
+        ("business", 12),
+        ("bluebadge", 12),
     ];
 
     for (kw, points) in critical_keywords {
-        if url_lower.contains(kw) && !reasons.iter().any(|r| r == &format!("keyword:{}", kw)) {
+        if url_lower.contains(kw) && !reasons.iter().any(|r| r == &format!("suspicious_keyword:{}", kw)) {
             score = score.saturating_add(*points);
-            reasons.push(format!("keyword:{}", kw));
+            reasons.push(format!("suspicious_keyword:{}", kw));
         }
     }
 
     if score < 20 {
         for (kw, points) in high_keywords {
-            if url_lower.contains(kw) && !reasons.iter().any(|r| r == &format!("keyword:{}", kw)) {
+            if url_lower.contains(kw)
+                && !reasons.iter().any(|r| r == &format!("suspicious_keyword:{}", kw))
+            {
                 score = score.saturating_add(*points);
-                reasons.push(format!("keyword:{}", kw));
+                reasons.push(format!("suspicious_keyword:{}", kw));
             }
         }
     }
 
     if score < 30 {
         for (kw, points) in medium_keywords {
-            if url_lower.contains(kw) && !reasons.iter().any(|r| r == &format!("keyword:{}", kw)) {
+            if url_lower.contains(kw)
+                && !reasons.iter().any(|r| r == &format!("suspicious_keyword:{}", kw))
+            {
                 score = score.saturating_add(*points);
-                reasons.push(format!("keyword:{}", kw));
+                reasons.push(format!("suspicious_keyword:{}", kw));
             }
         }
     }
 
-    score = score.min(40);
+    score = score.min(50);
     (score, reasons)
 }

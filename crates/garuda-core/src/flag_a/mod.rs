@@ -57,9 +57,9 @@ pub fn analyse(url: &str) -> (u8, Vec<String>) {
         reasons.push(format!("trusted_indian_domain:{}", parts.host));
     }
 
-    let (s, r) = brand::check(&parts.original);
-    score = score.saturating_add(s);
-    reasons.extend(r);
+    let brand_result = brand::check(&parts.original);
+    score = score.saturating_add(brand_result.score);
+    reasons.extend(brand_result.reasons.clone());
 
     let (s, r) = platform::check(&parts.host);
     score = score.saturating_add(s);
@@ -74,7 +74,12 @@ pub fn analyse(url: &str) -> (u8, Vec<String>) {
     score = score.saturating_add(s);
     reasons.extend(r);
 
-    let context = url::analyze_context(&parts.host, &parts.path_and_query, &reasons);
+    let context = url::analyze_context(
+        &parts.host,
+        &parts.path_and_query,
+        &reasons,
+        &brand_result.matches,
+    );
     score = url::apply_contextual_multiplier(score, &context);
 
     (score, reasons)
@@ -86,8 +91,13 @@ mod tests {
     use crate::scorer::score_to_verdict;
     use crate::types::Verdict;
 
+    fn setup_brand_rules() {
+        std::env::set_var("GARUDA_BRANDS_PATH", "../../lists/brands.json");
+    }
+
     #[test]
     fn safe_domain_stays_clean() {
+        setup_brand_rules();
         let (score, reasons) = analyse("https://google.com");
         let verdict = score_to_verdict(score, reasons);
         assert!(matches!(verdict.verdict, Verdict::Clean));
@@ -95,6 +105,7 @@ mod tests {
 
     #[test]
     fn free_platform_brand_impersonation_is_blocked() {
+        setup_brand_rules();
         let (score, reasons) = analyse("https://google-account-verify.vercel.app/login");
         assert!(reasons.iter().any(|reason| reason.contains("suspicious_hosting:vercel.app")));
         let verdict = score_to_verdict(score, reasons);
@@ -103,21 +114,24 @@ mod tests {
 
     #[test]
     fn mixed_script_domain_is_flagged() {
+        setup_brand_rules();
         let (score, reasons) = analyse("https://rnicrosoft.com");
         let verdict = score_to_verdict(score, reasons);
-        assert!(score >= 40 || matches!(verdict.verdict, Verdict::Caution | Verdict::Block));
+        assert!(score >= 25 || matches!(verdict.verdict, Verdict::Suspicious | Verdict::Caution | Verdict::Block));
     }
 
     #[test]
     fn firebase_phishing_is_blocked() {
+        setup_brand_rules();
         let (score, reasons) = analyse("https://sbi-kyc-update.firebaseapp.com/login");
         assert!(reasons.iter().any(|reason| reason.contains("suspicious_hosting:firebaseapp.com")));
         let verdict = score_to_verdict(score, reasons);
-        assert!(score >= 40 || matches!(verdict.verdict, Verdict::Caution | Verdict::Block));
+        assert!(matches!(verdict.verdict, Verdict::Caution | Verdict::Block));
     }
 
     #[test]
     fn trusted_indian_domain_is_not_penalized() {
+        setup_brand_rules();
         let (score, reasons) = analyse("https://uidai.gov.in");
         assert!(reasons.iter().any(|reason| reason.contains("trusted_indian_domain:uidai.gov.in")));
         let verdict = score_to_verdict(score, reasons);
@@ -126,20 +140,23 @@ mod tests {
 
     #[test]
     fn homoglyph_l_i_substitution_detected() {
+        setup_brand_rules();
         let (score, _reasons) = analyse("https://paypaI.com");
-        assert!(score >= 40, "paypaI (l/I substitution) should be detected, got score {}", score);
+        assert!(score >= 50, "paypaI (l/I substitution) should be detected, got score {}", score);
     }
 
     #[test]
     fn homoglyph_capital_O_zero_detected() {
+        setup_brand_rules();
         let (score, _reasons) = analyse("https://goog1e.com");
-        assert!(score >= 30, "goog1e (1/i substitution) should be detected, got score {}", score);
+        assert!(score >= 50, "goog1e (1/i substitution) should be detected, got score {}", score);
     }
 
     #[test]
     fn brand_containment_with_hosting_multiplies_risk() {
+        setup_brand_rules();
         let (score, reasons) = analyse("https://phonepe-kyc-auth.pages.dev");
-        assert!(score >= 60,
+        assert!(score >= 80,
             "phonepe + kyc on pages.dev should be high risk due to contextual multiplier, got score {}", score);
         assert!(reasons.iter().any(|r| r.contains("brand_impersonation:phonepe")));
         assert!(reasons.iter().any(|r| r.contains("suspicious_hosting:pages.dev")));
@@ -147,38 +164,43 @@ mod tests {
 
     #[test]
     fn wallet_recovery_is_highly_suspicious() {
+        setup_brand_rules();
         let (score, _reasons) = analyse("https://wallet-recovery-seed.netlify.app");
-        assert!(score >= 50,
+        assert!(score >= 60,
             "wallet + recovery + seed on netlify should trigger high score due to crypto keyword multiplier, got {}", score);
     }
 
     #[test]
     fn bank_login_on_free_hosting_is_high_severity() {
+        setup_brand_rules();
         let (score, reasons) = analyse("https://axisbank-secure-netbanking.web.app/login");
-        assert!(score >= 70,
+        assert!(score >= 80,
             "bank brand + netbanking + login on web.app should be very high due to multipliers, got {}", score);
         assert!(reasons.iter().any(|r| r.contains("brand_impersonation")));
     }
 
     #[test]
     fn income_tax_refund_scam_detected() {
+        setup_brand_rules();
         let (score, reasons) = analyse("https://income-tax-refund.netlify.app/verify");
         assert!(score >= 50,
             "refund + verify on hosting should be suspicious, got {}", score);
-        assert!(reasons.iter().any(|r| r.contains("keyword:refund")));
+        assert!(reasons.iter().any(|r| r.contains("suspicious_keyword:refund")));
     }
 
     #[test]
     fn paypal_kyc_on_firebase_multiplied() {
+        setup_brand_rules();
         let (score, reasons) = analyse("https://paypal-kyc-verification.firebaseapp.com");
-        assert!(score >= 75,
+        assert!(score >= 80,
             "paypal + kyc on firebase should trigger maximum multiplier, got {}", score);
         assert!(reasons.iter().any(|r| r.contains("brand_impersonation")));
-        assert!(reasons.iter().any(|r| r.contains("keyword:kyc")));
+        assert!(reasons.iter().any(|r| r.contains("suspicious_keyword:kyc")));
     }
 
     #[test]
     fn hosting_suffix_does_not_trigger_unrelated_brand() {
+        setup_brand_rules();
         let (_score, reasons) = analyse("https://kotak-netbanking-login.netlify.app");
         assert!(
             reasons.iter().all(|r| {
@@ -193,17 +215,19 @@ mod tests {
 
     #[test]
     fn github_typo_gets_high_confidence_brand_reason() {
+        setup_brand_rules();
         let (score, reasons) = analyse("https://githuub.com");
         assert!(
             reasons.iter().any(|r| r == "brand_impersonation:github"),
             "expected github brand reason, got {:?}",
             reasons
         );
-        assert!(score >= 40, "known-brand typo should not stay clean, got {}", score);
+        assert!(score >= 50, "known-brand typo should not stay clean, got {}", score);
     }
 
     #[test]
     fn gitlab_impersonation_is_not_misattributed() {
+        setup_brand_rules();
         let (_score, reasons) = analyse("https://gitlab-account-security.pages.dev");
         assert!(
             reasons.iter().any(|r| r == "brand_impersonation:gitlab"),
@@ -215,5 +239,24 @@ mod tests {
             "gitlab should not be mapped to github: {:?}",
             reasons
         );
+    }
+
+    #[test]
+    fn government_verify_is_critical() {
+        setup_brand_rules();
+        let (score, reasons) = analyse("https://aadhaar-verify.pages.dev/login");
+        assert!(score >= 80, "government verify should be critical, got {}", score);
+        assert!(reasons.iter().any(|r| r == "brand_impersonation:aadhaar"));
+    }
+
+    #[test]
+    fn typo_domains_block_without_keywords() {
+        setup_brand_rules();
+        let (score, _reasons) = analyse("https://rnicrosoft.com");
+        assert!(score >= 80, "rnicrosoft should be high-risk typo, got {}", score);
+        let (score, _reasons) = analyse("https://arnazon.in");
+        assert!(score >= 80, "arnazon should be high-risk typo, got {}", score);
+        let (score, _reasons) = analyse("https://linkedln.com");
+        assert!(score >= 80, "linkedln should be high-risk typo, got {}", score);
     }
 }

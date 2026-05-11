@@ -1,0 +1,285 @@
+{
+  "version": "1.0.0",
+  "rules": [
+    {
+      "canonical": "google",
+      "domain": "google.com",
+      "aliases": ["gpay", "googlepay"],
+      "category": "tech",
+      "risk": 85
+    },
+    {
+      "canonical": "microsoft",
+      "domain": "microsoft.com",
+      "aliases": [],
+      "category": "tech",
+      "risk": 85
+    },
+    {
+      "canonical": "paypal",
+      "domain": "paypal.com",
+      "aliases": [],
+      "category": "fintech",
+      "risk": 90
+    },
+    {
+      "canonical": "amazon",
+      "domain": "amazon.com",
+      "aliases": [],
+      "category": "ecommerce",
+      "risk": 75
+    },
+    {
+      "canonical": "apple",
+      "domain": "apple.com",
+      "aliases": [],
+      "category": "tech",
+      "risk": 80
+    },
+    {
+      "canonical": "facebook",
+      "domain": "facebook.com",
+      "aliases": [],
+      "category": "social",
+      "risk": 70
+    },
+    {
+      "canonical": "instagram",
+      "domain": "instagram.com",
+      "aliases": [],
+      "category": "social",
+      "risk": 70
+    },
+    {
+      "canonical": "twitter",
+      "domain": "x.com",
+      "aliases": [],
+      "category": "social",
+      "risk": 65
+    },
+    {
+      "canonical": "netflix",
+      "domain": "netflix.com",
+      "aliases": [],
+      "category": "saas",
+      "risk": 60
+    },
+    {
+      "canonical": "sbi",
+      "domain": "sbi.co.in",
+      "aliases": ["statebank"],
+      "category": "bank",
+      "risk": 95
+    },
+    {
+      "canonical": "hdfc",
+      "domain": "hdfcbank.com",
+      "aliases": ["hdfcbank"],
+      "category": "bank",
+      "risk": 95
+    },
+    {
+      "canonical": "icici",
+      "domain": "icicibank.com",
+      "aliases": ["icicibank"],
+      "category": "bank",
+      "risk": 95
+    },
+    {
+      "canonical": "axis",
+      "domain": "axisbank.com",
+      "aliases": ["axisbank"],
+      "category": "bank",
+      "risk": 95
+    },
+    {
+      "canonical": "paytm",
+      "domain": "paytm.com",
+      "aliases": [],
+      "category": "fintech",
+      "risk": 85
+    },
+    {
+      "canonical": "phonepe",
+      "domain": "phonepe.com",
+      "aliases": [],
+      "category": "fintech",
+      "risk": 90
+    },
+    {
+      "canonical": "whatsapp",
+      "domain": "whatsapp.com",
+      "aliases": [],
+      "category": "social",
+      "risk": 75
+    },
+    {
+      "canonical": "coinbase",
+      "domain": "coinbase.com",
+      "aliases": [],
+      "category": "crypto",
+      "risk": 95
+    },
+    {
+      "canonical": "binance",
+      "domain": "binance.com",
+      "aliases": [],
+      "category": "crypto",
+      "risk": 95
+    },
+    {
+      "canonical": "linkedin",
+      "domain": "linkedin.com",
+      "aliases": [],
+      "category": "social",
+      "risk": 70
+    },
+    {
+      "canonical": "telegram",
+      "domain": "telegram.org",
+      "aliases": [],
+      "category": "social",
+      "risk": 65
+    },
+    {
+      "canonical": "openai",
+      "domain": "openai.com",
+      "aliases": [],
+      "category": "tech",
+      "risk": 70
+    },
+    {
+      "canonical": "flipkart",
+      "domain": "flipkart.com",
+      "aliases": [],
+      "category": "ecommerce",
+      "risk": 75
+    },
+    {
+      "canonical": "yahoo",
+      "domain": "yahoo.com",
+      "aliases": [],
+      "category": "tech",
+      "risk": 60
+    },
+    {
+      "canonical": "zoom",
+      "domain": "zoom.us",
+      "aliases": [],
+      "category": "saas",
+      "risk": 65
+    },
+    {
+      "canonical": "dropbox",
+      "domain": "dropbox.com",
+      "aliases": [],
+      "category": "saas",
+      "risk": 65
+    },
+    {
+      "canonical": "onedrive",
+      "domain": "onedrive.live.com",
+      "aliases": [],
+      "category": "tech",
+      "risk": 65
+    },
+    {
+      "canonical": "github",
+      "domain": "github.com",
+      "aliases": [],
+      "category": "tech",
+      "risk": 60
+    },
+    {
+      "canonical": "gitlab",
+      "domain": "gitlab.com",
+      "aliases": [],
+      "category": "tech",
+      "risk": 60
+    },
+    {
+      "canonical": "kotak",
+      "domain": "kotak.com",
+      "aliases": ["kotakbank"],
+      "category": "bank",
+      "risk": 90
+    },
+    {
+      "canonical": "myntra",
+      "domain": "myntra.com",
+      "aliases": [],
+      "category": "ecommerce",
+      "risk": 70
+    },
+    {
+      "canonical": "meesho",
+      "domain": "meesho.com",
+      "aliases": [],
+      "category": "ecommerce",
+      "risk": 70
+    },
+    {
+      "canonical": "notion",
+      "domain": "notion.so",
+      "aliases": [],
+      "category": "saas",
+      "risk": 60
+    },
+    {
+      "canonical": "metamask",
+      "domain": "metamask.io",
+      "aliases": [],
+      "category": "crypto",
+      "risk": 95
+    },
+    {
+      "canonical": "phantom",
+      "domain": "phantom.app",
+      "aliases": [],
+      "category": "crypto",
+      "risk": 90
+    },
+    {
+      "canonical": "trustwallet",
+      "domain": "trustwallet.com",
+      "aliases": [],
+      "category": "crypto",
+      "risk": 90
+    },
+    {
+      "canonical": "aadhaar",
+      "domain": "uidai.gov.in",
+      "aliases": ["aadhar"],
+      "category": "government",
+      "risk": 98
+    },
+    {
+      "canonical": "airtel",
+      "domain": "airtel.in",
+      "aliases": [],
+      "category": "telecom",
+      "risk": 70
+    },
+    {
+      "canonical": "jio",
+      "domain": "jio.com",
+      "aliases": [],
+      "category": "telecom",
+      "risk": 70
+    },
+    {
+      "canonical": "vi",
+      "domain": "myvi.in",
+      "aliases": ["vodafoneidea"],
+      "category": "telecom",
+      "risk": 65
+    },
+    {
+      "canonical": "bsnl",
+      "domain": "bsnl.co.in",
+      "aliases": [],
+      "category": "telecom",
+      "risk": 65
+    }
+  ]
+}

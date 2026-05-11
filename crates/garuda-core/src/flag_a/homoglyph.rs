@@ -1,9 +1,9 @@
 use crate::url;
 
 pub fn check(url: &str) -> (u8, Vec<String>) {
-    let normalized = url::normalize_homoglyphs(url);
-    
-    if normalized != url.to_lowercase() {
+    let (normalized, changed) = url::normalize_homoglyphs_with_flags(url);
+
+    if changed && normalized != url.to_lowercase() {
         return (40, vec!["homoglyph_detected".to_string()]);
     }
 

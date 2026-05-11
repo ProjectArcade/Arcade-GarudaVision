@@ -1,6 +1,7 @@
 #[derive(Debug)]
 pub enum Verdict {
     Clean,
+    Suspicious,
     Caution,
     Block,
 }

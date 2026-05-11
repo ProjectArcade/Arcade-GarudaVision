@@ -1,49 +1,54 @@
-use crate::url;
+use crate::url::{self, BrandMatch, MatchType};
 
-pub fn check(url: &str) -> (u8, Vec<String>) {
-    let parts = url::parse_url(url);
-    
-    for brand in url::brand_candidates(&parts.host) {
-        let legit_domain = url::brand_legit_domain(brand);
-        let is_legit = legit_domain
-            .map(|domain| url::is_domain_or_subdomain(&parts.host, domain))
-            .unwrap_or(false);
-
-        if !is_legit {
-            let points = if legit_domain.is_some() { 40 } else { 20 };
-            return (points, vec![format!("brand_impersonation:{}", brand)]);
-        }
-    }
-
-    let host_normalized = url::normalize_homoglyphs(&parts.host);
-    for brand in url::brand_candidates(&host_normalized) {
-        if contains_brand_as_word(&host_normalized, brand) {
-            let legit_domain = url::brand_legit_domain(brand);
-            let is_legit = legit_domain
-                .map(|domain| url::is_domain_or_subdomain(&host_normalized, domain))
-                .unwrap_or(false);
-            
-            if !is_legit {
-                return (50, vec![format!("brand_impersonation:{}", brand)]);
-            }
-        }
-    }
-
-    (0, vec![])
+pub struct BrandCheckResult {
+    pub score: u8,
+    pub reasons: Vec<String>,
+    pub matches: Vec<BrandMatch>,
 }
 
-fn contains_brand_as_word(host: &str, brand: &str) -> bool {
-    let separators = ['-', '.', '_'];
-    if host.contains(brand) {
-        let brand_len = brand.len();
-        for (i, _) in host.match_indices(brand) {
-            let before_ok = i == 0 || separators.contains(&host.chars().nth(i - 1).unwrap_or('a'));
-            let after_ok = (i + brand_len >= host.len())
-                || separators.contains(&host.chars().nth(i + brand_len).unwrap_or('a'));
-            if before_ok && after_ok {
-                return true;
-            }
+pub fn check(url: &str) -> BrandCheckResult {
+    let parts = url::parse_url(url);
+    let matches = url::find_brand_matches(&parts.host);
+    if matches.is_empty() {
+        return BrandCheckResult {
+            score: 0,
+            reasons: Vec::new(),
+            matches,
+        };
+    }
+
+    let mut reasons = Vec::new();
+    let mut highest = 0u8;
+    let mut primary = None;
+
+    for brand_match in matches.iter() {
+        let score = match_score(brand_match);
+        if score > highest {
+            highest = score;
+            primary = Some(brand_match);
         }
     }
-    false
+
+    if let Some(primary) = primary {
+        reasons.push(format!("brand_impersonation:{}", primary.brand));
+    }
+
+    BrandCheckResult {
+        score: highest,
+        reasons,
+        matches,
+    }
+}
+
+fn match_score(brand_match: &BrandMatch) -> u8 {
+    let base: u8 = match brand_match.match_type {
+        MatchType::Exact => 45,
+        MatchType::Alias => 45,
+        MatchType::Normalized => 50,
+        MatchType::Homoglyph => 60,
+        MatchType::TypoDistance => 65,
+    };
+
+    let risk_boost = ((brand_match.risk as f32) * 0.3).round() as u8;
+    base.saturating_add(risk_boost).min(90)
 }

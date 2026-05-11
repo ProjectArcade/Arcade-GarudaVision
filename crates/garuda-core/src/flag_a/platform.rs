@@ -15,12 +15,13 @@ fn matched_platform(host: &str) -> Option<&'static str> {
         "netlify.app",
         "github.io",
         "pages.dev",
-        "glitch.me",
-        "replit.dev",
-        "render.com",
-        "fly.dev",
         "firebaseapp.com",
         "web.app",
+        "onrender.com",
+        "herokuapp.com",
+        "glitch.me",
+        "replit.dev",
+        "fly.dev",
         "appspot.com",
     ];
 
