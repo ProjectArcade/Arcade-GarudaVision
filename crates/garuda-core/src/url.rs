@@ -1,5 +1,6 @@
 use crate::brand_rules::{self, BrandCategory, BrandRule};
 use garuda_lists::{platform_list, safe_list};
+use std::collections::HashSet;
 use unicode_normalization::UnicodeNormalization;
 
 #[derive(Debug, Clone)]
@@ -190,7 +191,15 @@ fn build_match(rule: &BrandRule, match_type: MatchType, confidence: f32) -> Bran
 fn tokenize_host(host: &str) -> Vec<String> {
     host.split(['.', '-', '_'])
         .filter(|token| !token.is_empty())
-        .map(|token| token.to_string())
+        .flat_map(|token| split_compound_token(token))
+        .collect()
+}
+
+pub fn tokenize_for_keywords(value: &str) -> Vec<String> {
+    value
+        .split(|ch: char| !ch.is_ascii_alphanumeric())
+        .filter(|token| !token.is_empty())
+        .flat_map(|token| split_compound_token(token))
         .collect()
 }
 
@@ -201,6 +210,91 @@ fn normalize_token(token: &str) -> String {
         .collect::<String>()
         .to_lowercase()
 }
+
+fn split_compound_token(token: &str) -> Vec<String> {
+    let normalized = normalize_token(token);
+    if normalized.len() < 8 {
+        return vec![normalized];
+    }
+
+    let dictionary: HashSet<&'static str> = COMPOUND_WORDS.iter().copied().collect();
+    let bytes = normalized.as_bytes();
+    let len = bytes.len();
+    let mut prev: Vec<Option<usize>> = vec![None; len + 1];
+    prev[0] = Some(0);
+
+    for i in 1..=len {
+        for j in (0..i).rev() {
+            if prev[j].is_some() {
+                let slice = &normalized[j..i];
+                if dictionary.contains(slice) {
+                    prev[i] = Some(j);
+                    break;
+                }
+            }
+        }
+    }
+
+    if prev[len].is_none() {
+        return vec![normalized];
+    }
+
+    let mut parts = Vec::new();
+    let mut index = len;
+    while index > 0 {
+        let start = prev[index].unwrap_or(0);
+        let part = normalized[start..index].to_string();
+        parts.push(part);
+        index = start;
+    }
+    parts.reverse();
+
+    if parts.len() < 2 {
+        return vec![normalized];
+    }
+
+    parts
+}
+
+const COMPOUND_WORDS: &[&str] = &[
+    "account",
+    "verify",
+    "verification",
+    "security",
+    "check",
+    "wallet",
+    "connect",
+    "signin",
+    "login",
+    "auth",
+    "authentication",
+    "portal",
+    "support",
+    "update",
+    "recover",
+    "recovery",
+    "seed",
+    "otp",
+    "kyc",
+    "bank",
+    "payment",
+    "billing",
+    "paypal",
+    "microsoft",
+    "office365",
+    "microsoftonline",
+    "outlook",
+    "appleid",
+    "icloud",
+    "gmail",
+    "gdrive",
+    "workspace",
+    "aws",
+    "primevideo",
+    "linkedinpremium",
+    "walletconnect",
+    "githubauth",
+];
 
 fn is_noise_token(token: &str, host: &str) -> bool {
     const NOISE: &[&str] = &[
@@ -447,6 +541,11 @@ pub struct SuspiciousContext {
     pub brand_name: Option<String>,
     pub brand_categories: Vec<BrandCategory>,
     pub brand_risk: Option<u8>,
+    pub has_wallet_keyword: bool,
+    pub has_recovery_keyword: bool,
+    pub has_login_keyword: bool,
+    pub has_verify_keyword: bool,
+    pub has_otp_keyword: bool,
 }
 
 pub fn analyze_context(
@@ -465,12 +564,22 @@ pub fn analyze_context(
         "login", "verify", "password", "auth", "account", "confirm", "otp", "signin",
     ];
     let crypto_keywords = &["seed", "phrase", "recovery", "private", "key", "mnemonic"];
+    let wallet_keywords = &["wallet", "walletconnect"];
+    let recovery_keywords = &["recovery", "seed", "mnemonic", "phrase"];
+    let login_keywords = &["login", "signin", "authentication", "auth"];
+    let verify_keywords = &["verify", "verification", "confirm"];
+    let otp_keywords = &["otp", "one-time", "onetime"];
 
     let has_brand = !brand_matches.is_empty()
         || reasons.iter().any(|r| r.contains("brand_impersonation"));
     let has_financial_keyword = financial_keywords.iter().any(|kw| combined.contains(kw));
     let has_auth_keyword = auth_keywords.iter().any(|kw| combined.contains(kw));
     let has_crypto_keyword = crypto_keywords.iter().any(|kw| combined.contains(kw));
+    let has_wallet_keyword = wallet_keywords.iter().any(|kw| combined.contains(kw));
+    let has_recovery_keyword = recovery_keywords.iter().any(|kw| combined.contains(kw));
+    let has_login_keyword = login_keywords.iter().any(|kw| combined.contains(kw));
+    let has_verify_keyword = verify_keywords.iter().any(|kw| combined.contains(kw));
+    let has_otp_keyword = otp_keywords.iter().any(|kw| combined.contains(kw));
     let has_free_hosting = reasons.iter().any(|r| r.contains("free_platform") || r.contains("suspicious_hosting"));
 
     let brand_name = brand_matches
@@ -495,6 +604,11 @@ pub fn analyze_context(
         brand_name,
         brand_categories,
         brand_risk,
+        has_wallet_keyword,
+        has_recovery_keyword,
+        has_login_keyword,
+        has_verify_keyword,
+        has_otp_keyword,
     }
 }
 
@@ -521,6 +635,25 @@ pub fn apply_contextual_multiplier(base_score: u8, context: &SuspiciousContext) 
         bonus += 0.8;
     }
 
+    if context.has_wallet_keyword && context.has_recovery_keyword {
+        bonus += 0.7;
+    }
+
+    if context.has_brand && context.has_login_keyword {
+        bonus += 0.5;
+    }
+
+    if context.has_brand && context.has_verify_keyword {
+        bonus += 0.4;
+    }
+
+    if context.brand_categories.contains(&BrandCategory::Bank)
+        && context.has_login_keyword
+        && context.has_otp_keyword
+    {
+        bonus += 0.9;
+    }
+
     if context.brand_categories.contains(&BrandCategory::Government) && context.has_auth_keyword {
         bonus += 1.0;
     }
@@ -537,6 +670,7 @@ pub fn apply_contextual_multiplier(base_score: u8, context: &SuspiciousContext) 
         bonus += (risk as f32 / 100.0) * 0.2;
     }
 
+    bonus = bonus.min(1.8);
     let adjusted = (base_score as f32 * (1.0 + bonus)).round() as u8;
     adjusted.min(100)
 }

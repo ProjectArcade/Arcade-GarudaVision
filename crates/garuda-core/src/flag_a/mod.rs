@@ -259,4 +259,43 @@ mod tests {
         let (score, _reasons) = analyse("https://linkedln.com");
         assert!(score >= 80, "linkedln should be high-risk typo, got {}", score);
     }
+
+    #[test]
+    fn enterprise_microsoftonline_phishing_detected() {
+        setup_brand_rules();
+        let (score, reasons) = analyse("https://login.microsoftonline-support.com");
+        assert!(score >= 80, "microsoftonline support phish should be high risk, got {}", score);
+        assert!(reasons.iter().any(|r| r == "brand_impersonation:microsoftonline"));
+    }
+
+    #[test]
+    fn compound_keyword_tokens_are_split() {
+        setup_brand_rules();
+        let (_score, reasons) = analyse("https://accountverify-securitycheck.pages.dev/login");
+        assert!(reasons.iter().any(|r| r == "suspicious_keyword:account"));
+        assert!(reasons.iter().any(|r| r == "suspicious_keyword:verify"));
+        assert!(reasons.iter().any(|r| r == "suspicious_keyword:security"));
+    }
+
+    #[test]
+    fn compound_brand_token_detected() {
+        setup_brand_rules();
+        let (_score, reasons) = analyse("https://signinpaypal-authenticationportal.com");
+        assert!(reasons.iter().any(|r| r == "brand_impersonation:paypal"));
+    }
+
+    #[test]
+    fn government_portal_phishing_detected() {
+        setup_brand_rules();
+        let (score, reasons) = analyse("https://incometax-verification.pages.dev/login");
+        assert!(score >= 80, "incometax verify should be high risk, got {}", score);
+        assert!(reasons.iter().any(|r| r == "brand_impersonation:incometax"));
+    }
+
+    #[test]
+    fn legit_outlook_domain_not_flagged_as_impersonation() {
+        setup_brand_rules();
+        let (_score, reasons) = analyse("https://outlook.com");
+        assert!(reasons.iter().all(|r| r != "brand_impersonation:outlook"));
+    }
 }

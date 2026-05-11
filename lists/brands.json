@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "rules": [
     {
       "canonical": "google",
@@ -9,8 +9,50 @@
       "risk": 85
     },
     {
+      "canonical": "gmail",
+      "domain": "gmail.com",
+      "aliases": [],
+      "category": "tech",
+      "risk": 80
+    },
+    {
+      "canonical": "gdrive",
+      "domain": "google.com",
+      "aliases": ["googledrive"],
+      "category": "tech",
+      "risk": 80
+    },
+    {
+      "canonical": "workspace",
+      "domain": "google.com",
+      "aliases": ["googleworkspace"],
+      "category": "tech",
+      "risk": 75
+    },
+    {
       "canonical": "microsoft",
       "domain": "microsoft.com",
+      "aliases": [],
+      "category": "tech",
+      "risk": 85
+    },
+    {
+      "canonical": "microsoftonline",
+      "domain": "microsoftonline.com",
+      "aliases": [],
+      "category": "tech",
+      "risk": 92
+    },
+    {
+      "canonical": "outlook",
+      "domain": "outlook.com",
+      "aliases": [],
+      "category": "tech",
+      "risk": 85
+    },
+    {
+      "canonical": "office365",
+      "domain": "office365.com",
       "aliases": [],
       "category": "tech",
       "risk": 85
@@ -30,8 +72,29 @@
       "risk": 75
     },
     {
+      "canonical": "aws",
+      "domain": "amazon.com",
+      "aliases": [],
+      "category": "tech",
+      "risk": 80
+    },
+    {
+      "canonical": "primevideo",
+      "domain": "primevideo.com",
+      "aliases": [],
+      "category": "ecommerce",
+      "risk": 70
+    },
+    {
       "canonical": "apple",
       "domain": "apple.com",
+      "aliases": ["appleid"],
+      "category": "tech",
+      "risk": 80
+    },
+    {
+      "canonical": "icloud",
+      "domain": "icloud.com",
       "aliases": [],
       "category": "tech",
       "risk": 80
@@ -93,6 +156,34 @@
       "risk": 95
     },
     {
+      "canonical": "chase",
+      "domain": "chase.com",
+      "aliases": ["jpmorgan"],
+      "category": "bank",
+      "risk": 95
+    },
+    {
+      "canonical": "bankofamerica",
+      "domain": "bankofamerica.com",
+      "aliases": ["bofa"],
+      "category": "bank",
+      "risk": 95
+    },
+    {
+      "canonical": "wellsfargo",
+      "domain": "wellsfargo.com",
+      "aliases": [],
+      "category": "bank",
+      "risk": 95
+    },
+    {
+      "canonical": "hsbc",
+      "domain": "hsbc.com",
+      "aliases": [],
+      "category": "bank",
+      "risk": 95
+    },
+    {
       "canonical": "paytm",
       "domain": "paytm.com",
       "aliases": [],
@@ -128,9 +219,51 @@
       "risk": 95
     },
     {
+      "canonical": "ledger",
+      "domain": "ledger.com",
+      "aliases": [],
+      "category": "crypto",
+      "risk": 90
+    },
+    {
+      "canonical": "trezor",
+      "domain": "trezor.io",
+      "aliases": [],
+      "category": "crypto",
+      "risk": 90
+    },
+    {
+      "canonical": "kraken",
+      "domain": "kraken.com",
+      "aliases": [],
+      "category": "crypto",
+      "risk": 90
+    },
+    {
+      "canonical": "uniswap",
+      "domain": "uniswap.org",
+      "aliases": [],
+      "category": "crypto",
+      "risk": 90
+    },
+    {
+      "canonical": "blockchain",
+      "domain": "blockchain.com",
+      "aliases": [],
+      "category": "crypto",
+      "risk": 90
+    },
+    {
+      "canonical": "walletconnect",
+      "domain": "walletconnect.com",
+      "aliases": [],
+      "category": "crypto",
+      "risk": 92
+    },
+    {
       "canonical": "linkedin",
       "domain": "linkedin.com",
-      "aliases": [],
+      "aliases": ["linkedinpremium"],
       "category": "social",
       "risk": 70
     },
@@ -186,7 +319,7 @@
     {
       "canonical": "github",
       "domain": "github.com",
-      "aliases": [],
+      "aliases": ["githubauth"],
       "category": "tech",
       "risk": 60
     },
@@ -196,6 +329,41 @@
       "aliases": [],
       "category": "tech",
       "risk": 60
+    },
+    {
+      "canonical": "okta",
+      "domain": "okta.com",
+      "aliases": [],
+      "category": "saas",
+      "risk": 75
+    },
+    {
+      "canonical": "slack",
+      "domain": "slack.com",
+      "aliases": [],
+      "category": "saas",
+      "risk": 70
+    },
+    {
+      "canonical": "salesforce",
+      "domain": "salesforce.com",
+      "aliases": [],
+      "category": "saas",
+      "risk": 70
+    },
+    {
+      "canonical": "adobe",
+      "domain": "adobe.com",
+      "aliases": [],
+      "category": "saas",
+      "risk": 65
+    },
+    {
+      "canonical": "atlassian",
+      "domain": "atlassian.com",
+      "aliases": [],
+      "category": "saas",
+      "risk": 65
     },
     {
       "canonical": "kotak",
@@ -250,6 +418,34 @@
       "canonical": "aadhaar",
       "domain": "uidai.gov.in",
       "aliases": ["aadhar"],
+      "category": "government",
+      "risk": 98
+    },
+    {
+      "canonical": "incometax",
+      "domain": "incometax.gov.in",
+      "aliases": ["incometaxindia"],
+      "category": "government",
+      "risk": 98
+    },
+    {
+      "canonical": "gst",
+      "domain": "gst.gov.in",
+      "aliases": [],
+      "category": "government",
+      "risk": 98
+    },
+    {
+      "canonical": "digilocker",
+      "domain": "digilocker.gov.in",
+      "aliases": [],
+      "category": "government",
+      "risk": 98
+    },
+    {
+      "canonical": "passportindia",
+      "domain": "passportindia.gov.in",
+      "aliases": [],
       "category": "government",
       "risk": 98
     },
