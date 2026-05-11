@@ -1,82 +1,277 @@
-# Arcade Lykon – Garuda Vision Proposal
+# GarudaVision
 
-## Introduction
+GarudaVision is a lightweight phishing detection engine written in Rust that detects typo-squatting, homoglyph attacks, hosted phishing kits, enterprise impersonation, banking scams, crypto wallet phishing, and suspicious authentication portals using deterministic layered heuristics.
 
-Garuda Vision is a proposed native intelligence layer for Lykon that goes beyond encrypted connections to determine whether a URL can actually be trusted. By analyzing domain structures, brand signals, and page content in real time — both before and after a page loads — Garuda Vision addresses a critical limitation in modern browser security.
+The engine focuses on:
 
-Today’s browsers answer the question:
-
-> “Is this connection secure?”
-
-Garuda Vision is designed to answer the more important question:
-
-> “Is this destination safe?”
-
-The modern web faces a growing trust problem. Current browsers are primarily built to verify whether a connection is encrypted, not whether the destination itself is legitimate. These are fundamentally different concerns, and the gap between them is where millions of users are deceived every year.
-
-Garuda Vision aims to bridge this gap by introducing native browser intelligence capable of evaluating trust signals before a user fully interacts with a webpage.
+* high detection quality
+* low false positives
+* explainable scoring
+* dynamic rule intelligence
+* real-world phishing infrastructure patterns
 
 ---
 
-## The Problem
+# Features
 
-When a browser displays a padlock icon, it confirms only one thing:
-
-* The connection between the user and the server is encrypted.
-
-It does **not** verify:
-
-* Who operates the website
-* Whether the destination is legitimate
-* Whether the page is attempting to impersonate a trusted brand
-
-Attackers have exploited this weakness for years. A phishing page hosted at:
-
-`googleauthlogin.vercel.app`
-
-can display the same padlock icon as:
-
-`google.com`
-
-because the encryption is genuine — even if the intent behind the page is malicious.
-
-### Limitations of Current Browser Security
-
-Most browser security systems rely heavily on blocklists: databases containing known malicious domains. The core issue with this model is timing.
-
-A typical phishing site:
-
-1. Goes live
-2. Harvests credentials
-3. Disappears within hours
-
-In many cases, the attack succeeds before the domain is ever added to a blocklist. The defense activates only after the damage has already occurred.
+* Layered phishing detection pipeline
+* Brand impersonation detection
+* Homoglyph normalization
+* Typo-domain analysis
+* Enterprise SSO and OAuth phishing detection
+* Banking and fintech phishing heuristics
+* Crypto wallet scam detection
+* Government portal impersonation detection
+* Suspicious keyword intelligence
+* Hosted phishing kit detection
+* Dynamic JSON-based intelligence loading
+* Hot reload + remote updater support
+* Explainable scoring and verdicts
+* Regression testing suite
 
 ---
 
-## Scope of Detection
+# Detection Capabilities
 
-The phishing examples throughout this proposal frequently reference free hosting platforms such as:
+GarudaVision detects:
 
-* `vercel.app`
-* `netlify.app`
+## Typo Squatting
 
-This is not because Garuda Vision is limited to detecting threats on those platforms. They are highlighted because they currently represent one of the fastest-growing and least-defended attack vectors on the web.
+Examples:
 
-Garuda Vision evaluates trust signals across the entire internet, regardless of domain extension or hosting provider.
+```text
+paypa1.com
+rnicrosoft.com
+linkedln.com
+g00gle.com
+```
 
-Examples within scope include:
+## Hosted Phishing Kits
 
-* Homoglyph attacks on `.com` domains
-* Credential-harvesting pages on `.in` domains
-* Brand impersonation pages on `.co` domains
+Examples:
 
-All of these threats are analyzed using the same detection layers proposed within Garuda Vision.
+```text
+paypal-login.vercel.app
+secure-sbi-login.pages.dev
+google-drive-share.web.app
+```
 
-The platform examples are intended to illustrate the problem — not define the limits of detection.
+## Enterprise Phishing
+
+Examples:
+
+```text
+office365-verification-center.com
+login.microsoftonline-support.com
+githubauth-security-check.com
+```
+
+## Banking / Fintech Phishing
+
+Examples:
+
+```text
+hdfc-kyc-update.pages.dev
+axisbank-otp-auth.firebaseapp.com
+paytm-wallet-security.vercel.app
+```
+
+## Crypto Wallet Scams
+
+Examples:
+
+```text
+metamask-wallet-recovery.net
+walletconnect-metamask.net
+trustwallet-dapps-connect.org
+```
 
 ---
 
-## Learn More
+# Architecture
 
-[Garuda Vision Full Documentation](https://docs.google.com/document/d/1pEkEXVbTcQIA3jZqvhHxFgENFgyUlIzwtaiI4n_St1g/edit?usp=sharing&utm_source=chatgpt.com)
+GarudaVision uses deterministic layered heuristics instead of unrestricted fuzzy matching.
+
+Pipeline:
+
+```text
+normalize
+→ tokenize
+→ alias extraction
+→ homoglyph normalization
+→ typo analysis
+→ contextual scoring
+→ verdict generation
+```
+
+Core components:
+
+```text
+src/
+├── analyzer/
+├── detectors/
+├── intelligence/
+├── models/
+└── tests/
+```
+
+---
+
+# Dynamic Intelligence System
+
+Brand intelligence is stored externally in JSON files.
+
+Example:
+
+```json
+{
+  "canonical": "google",
+  "domain": "google.com",
+  "aliases": ["gmail", "gdrive", "workspace"],
+  "category": "tech",
+  "risk": 90
+}
+```
+
+Supported intelligence files:
+
+```text
+lists/
+├── brands.json
+├── keywords.json
+├── hosting.json
+├── homoglyphs.json
+├── typo_aliases.json
+└── metadata.json
+```
+
+Rules can be:
+
+* updated without recompiling
+* hot reloaded
+* remotely fetched from GitHub raw URLs
+
+---
+
+# Build
+
+## Requirements
+
+* Rust stable
+* Cargo
+
+Install Rust:
+
+```bash
+curl https://sh.rustup.rs -sSf | sh
+```
+
+Clone repository:
+
+```bash
+git clone https://github.com/ProjectArcade/Arcade-GarudaVision.git
+cd Arcade-GarudaVision
+```
+
+Build project:
+
+```bash
+cargo build --release
+```
+
+Run tests:
+
+```bash
+cargo test -p garuda-core
+```
+
+---
+
+# Running the CLI
+
+Basic usage:
+
+```bash
+cargo run -p garuda-cli -- check "https://www.rnicrosoft.com/en-in"
+```
+
+Example output:
+
+```text
+URL     : https://www.rnicrosoft.com/en-in
+Score   : 100
+Verdict : Block
+Reasons : [
+  "brand_impersonation:microsoft",
+  "homoglyph_detected"
+]
+```
+
+---
+
+# Dynamic Brand Intelligence
+
+Use external intelligence files:
+
+```bash
+export GARUDA_BRANDS_PATH=lists/brands.json
+```
+
+Enable hot reload:
+
+```bash
+export GARUDA_BRANDS_HOT_RELOAD=true
+```
+
+Configure remote updater:
+
+```bash
+export GARUDA_BRANDS_URL="https://raw.githubusercontent.com/<repo>/main/lists/brands.json"
+export GARUDA_BRANDS_UPDATE_INTERVAL_SECS=3600
+export GARUDA_BRANDS_CACHE_PATH=lists/cache/brands.json
+```
+
+---
+
+# Regression Testing
+
+Run the regression suite:
+
+```bash
+cargo test -p garuda-core
+```
+
+Manual phishing validation:
+
+```bash
+cargo run -p garuda-cli -- check "https://paypa1.com/login"
+cargo run -p garuda-cli -- check "https://secure-sbi-login.vercel.app"
+cargo run -p garuda-cli -- check "https://metamask-wallet-recovery.net"
+cargo run -p garuda-cli -- check "https://githubauth-security-check.com"
+```
+
+Legitimate sanity checks:
+
+```bash
+cargo run -p garuda-cli -- check "https://github.com"
+cargo run -p garuda-cli -- check "https://workspace.google.com"
+cargo run -p garuda-cli -- check "https://aws.amazon.com"
+```
+
+---
+
+# Verdict Thresholds
+
+| Score | Verdict    |
+| ----- | ---------- |
+| 0-24  | Clean      |
+| 25-49 | Suspicious |
+| 50-79 | Caution    |
+| 80+   | Block      |
+
+---
+
+
+# License
+
+GNU GENERAL PUBLIC LICENSE
