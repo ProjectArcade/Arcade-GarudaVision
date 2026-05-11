@@ -6,3 +6,6 @@ glitch.me
 replit.dev
 render.com
 fly.dev
+firebaseapp.com
+web.app
+appspot.com

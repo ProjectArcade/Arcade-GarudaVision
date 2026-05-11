@@ -52,6 +52,11 @@ pub fn analyse(url: &str) -> (u8, Vec<String>) {
         reasons.push(format!("safe_domain:{}", parts.host));
     }
 
+    if url::is_indian_trusted_domain(&parts.host) {
+        score = score.saturating_sub(10);
+        reasons.push(format!("trusted_indian_domain:{}", parts.host));
+    }
+
     let (s, r) = brand::check(&parts.original);
     score = score.saturating_add(s);
     reasons.extend(r);
@@ -68,6 +73,9 @@ pub fn analyse(url: &str) -> (u8, Vec<String>) {
     let (s, r) = homoglyph::check(&parts.original);
     score = score.saturating_add(s);
     reasons.extend(r);
+
+    let context = url::analyze_context(&parts.host, &parts.path_and_query, &reasons);
+    score = url::apply_contextual_multiplier(score, &context);
 
     (score, reasons)
 }
@@ -88,6 +96,7 @@ mod tests {
     #[test]
     fn free_platform_brand_impersonation_is_blocked() {
         let (score, reasons) = analyse("https://google-account-verify.vercel.app/login");
+        assert!(reasons.iter().any(|reason| reason.contains("suspicious_hosting:vercel.app")));
         let verdict = score_to_verdict(score, reasons);
         assert!(matches!(verdict.verdict, Verdict::Block));
     }
@@ -97,5 +106,74 @@ mod tests {
         let (score, reasons) = analyse("https://rnicrosoft.com");
         let verdict = score_to_verdict(score, reasons);
         assert!(score >= 40 || matches!(verdict.verdict, Verdict::Caution | Verdict::Block));
+    }
+
+    #[test]
+    fn firebase_phishing_is_blocked() {
+        let (score, reasons) = analyse("https://sbi-kyc-update.firebaseapp.com/login");
+        assert!(reasons.iter().any(|reason| reason.contains("suspicious_hosting:firebaseapp.com")));
+        let verdict = score_to_verdict(score, reasons);
+        assert!(score >= 40 || matches!(verdict.verdict, Verdict::Caution | Verdict::Block));
+    }
+
+    #[test]
+    fn trusted_indian_domain_is_not_penalized() {
+        let (score, reasons) = analyse("https://uidai.gov.in");
+        assert!(reasons.iter().any(|reason| reason.contains("trusted_indian_domain:uidai.gov.in")));
+        let verdict = score_to_verdict(score, reasons);
+        assert!(matches!(verdict.verdict, Verdict::Clean));
+    }
+
+    #[test]
+    fn homoglyph_l_i_substitution_detected() {
+        let (score, _reasons) = analyse("https://paypaI.com");
+        assert!(score >= 40, "paypaI (l/I substitution) should be detected, got score {}", score);
+    }
+
+    #[test]
+    fn homoglyph_capital_O_zero_detected() {
+        let (score, _reasons) = analyse("https://goog1e.com");
+        assert!(score >= 30, "goog1e (1/i substitution) should be detected, got score {}", score);
+    }
+
+    #[test]
+    fn brand_containment_with_hosting_multiplies_risk() {
+        let (score, reasons) = analyse("https://phonepe-kyc-auth.pages.dev");
+        assert!(score >= 60,
+            "phonepe + kyc on pages.dev should be high risk due to contextual multiplier, got score {}", score);
+        assert!(reasons.iter().any(|r| r.contains("brand_impersonation:phonepe")));
+        assert!(reasons.iter().any(|r| r.contains("suspicious_hosting:pages.dev")));
+    }
+
+    #[test]
+    fn wallet_recovery_is_highly_suspicious() {
+        let (score, _reasons) = analyse("https://wallet-recovery-seed.netlify.app");
+        assert!(score >= 50,
+            "wallet + recovery + seed on netlify should trigger high score due to crypto keyword multiplier, got {}", score);
+    }
+
+    #[test]
+    fn bank_login_on_free_hosting_is_high_severity() {
+        let (score, reasons) = analyse("https://axisbank-secure-netbanking.web.app/login");
+        assert!(score >= 70,
+            "bank brand + netbanking + login on web.app should be very high due to multipliers, got {}", score);
+        assert!(reasons.iter().any(|r| r.contains("brand_impersonation")));
+    }
+
+    #[test]
+    fn income_tax_refund_scam_detected() {
+        let (score, reasons) = analyse("https://income-tax-refund.netlify.app/verify");
+        assert!(score >= 50,
+            "refund + verify on hosting should be suspicious, got {}", score);
+        assert!(reasons.iter().any(|r| r.contains("keyword:refund")));
+    }
+
+    #[test]
+    fn paypal_kyc_on_firebase_multiplied() {
+        let (score, reasons) = analyse("https://paypal-kyc-verification.firebaseapp.com");
+        assert!(score >= 75,
+            "paypal + kyc on firebase should trigger maximum multiplier, got {}", score);
+        assert!(reasons.iter().any(|r| r.contains("brand_impersonation")));
+        assert!(reasons.iter().any(|r| r.contains("keyword:kyc")));
     }
 }
