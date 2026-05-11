@@ -14,16 +14,8 @@ pub fn analyse(url: &str) -> (u8, Vec<String>) {
     let mut score: u8 = 0;
     let mut reasons = Vec::new();
 
-    if url::has_punycode(&parts.host) {
-        score_push(&mut score, &mut reasons, 40, "punycode_hostname".to_string());
-    }
-
     if url::looks_like_ip(&parts.host) {
         score_push(&mut score, &mut reasons, 25, "ip_address_hostname".to_string());
-    }
-
-    if url::has_mixed_script(&parts.host) || url::has_mixed_script(&parts.normalized) {
-        score_push(&mut score, &mut reasons, 40, "mixed_script_hostname".to_string());
     }
 
     let subdomains = url::count_subdomains(&parts.host);
@@ -55,43 +47,9 @@ pub fn analyse(url: &str) -> (u8, Vec<String>) {
         );
     }
 
-    if url::is_free_platform(&parts.host) {
-        score_push(
-            &mut score,
-            &mut reasons,
-            20,
-            format!("free_platform:{}", parts.host),
-        );
-    }
-
     if url::is_safe_domain(&parts.host) {
         score = score.saturating_sub(20);
         reasons.push(format!("safe_domain:{}", parts.host));
-    }
-
-    for brand in url::brand_candidates(&parts.host) {
-        let legit_domain = url::brand_legit_domain(brand);
-        let legit = legit_domain
-            .map(|domain| url::is_domain_or_subdomain(&parts.host, domain))
-            .unwrap_or(false);
-
-        if !legit {
-            let amount = if legit_domain.is_some() { 35 } else { 20 };
-            score_push(
-                &mut score,
-                &mut reasons,
-                amount,
-                format!("brand_mismatch:{}", brand),
-            );
-        }
-    }
-
-    let combined = url::normalize_segments(&parts.host, &parts.path_and_query);
-    let keyword_hits = url::keyword_hits(&combined);
-    if !keyword_hits.is_empty() {
-        let keyword_score = (keyword_hits.len() as u8).saturating_mul(10).min(30);
-        score = score.saturating_add(keyword_score);
-        reasons.extend(keyword_hits.into_iter().map(|kw| format!("keyword:{}", kw)));
     }
 
     let (s, r) = brand::check(&parts.original);
@@ -102,6 +60,7 @@ pub fn analyse(url: &str) -> (u8, Vec<String>) {
     score = score.saturating_add(s);
     reasons.extend(r);
 
+    let combined = url::normalize_segments(&parts.host, &parts.path_and_query);
     let (s, r) = keywords::check(&combined);
     score = score.saturating_add(s);
     reasons.extend(r);
@@ -116,7 +75,8 @@ pub fn analyse(url: &str) -> (u8, Vec<String>) {
 #[cfg(test)]
 mod tests {
     use super::analyse;
-    use crate::scorer::{score_to_verdict, Verdict};
+    use crate::scorer::score_to_verdict;
+    use crate::types::Verdict;
 
     #[test]
     fn safe_domain_stays_clean() {

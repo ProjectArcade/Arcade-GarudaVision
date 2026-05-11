@@ -1,0 +1,19 @@
+# Rust build output
+/target
+
+# Backup files
+**/*.rs.bk
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# JetBrains
+.idea/
+
+# Vim
+*.swp
+*.swo

@@ -10,7 +10,7 @@ pub fn check(url: &str) -> (u8, Vec<String>) {
             .unwrap_or(false);
 
         if !is_legit {
-            let points = if legit_domain.is_some() { 35 } else { 20 };
+            let points = if legit_domain.is_some() { 40 } else { 20 };
             return (points, vec![format!("brand_mismatch:{}", brand)]);
         }
     }

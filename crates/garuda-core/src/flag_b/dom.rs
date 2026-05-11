@@ -1,5 +1,3 @@
-const BRAND_ASSETS: &[&str] = &["accounts.google.com", "microsoft.com", "paypal.com", "amazon.com"];
-
 pub fn check(html: &str, domain: &str) -> (u8, Vec<String>) {
     let html_lower = html.to_lowercase();
     let has_password = html_lower.contains("type=\"password\"")
@@ -49,9 +47,4 @@ fn form_action_mismatch(html: &str, domain: &str) -> bool {
     }
 
     false
-        if html_lower.contains(asset) {
-            return (30, vec![format!("brand_asset_impersonation:{}", asset)]);
-        }
-    }
-    (0, vec![])
 }

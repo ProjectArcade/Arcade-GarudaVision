@@ -34,12 +34,16 @@ pub fn parse_url(input: &str) -> UrlParts {
         .strip_prefix("https://")
         .or_else(|| normalized.strip_prefix("http://"))
         .unwrap_or(&normalized);
-    let without_credentials = without_scheme.rsplit_once('@').map(|(_, tail)| tail).unwrap_or(without_scheme);
+    let (authority, path_and_query) = match without_scheme.split_once('/') {
+        Some((authority, rest)) => (authority, format!("/{}", rest)),
+        None => (without_scheme, String::new()),
+    };
+    let without_credentials = authority.rsplit_once('@').map(|(_, tail)| tail).unwrap_or(authority);
     let without_www = without_credentials.strip_prefix("www.").unwrap_or(without_credentials);
 
-    let (host, path_and_query) = match without_www.split_once('/') {
-        Some((host, rest)) => (host, format!("/{}", rest)),
-        None => (without_www, String::new()),
+    let host = match without_www.split_once('/') {
+        Some((host, _)) => host,
+        None => without_www,
     };
 
     let host = host
@@ -76,9 +80,52 @@ pub fn is_free_platform(host: &str) -> bool {
 
 pub fn brand_candidates(host: &str) -> Vec<&'static str> {
     let host = host.to_lowercase();
+    let squashed = squash_common_typos(&host);
     brand_list::brands()
-        .filter(|brand| host.contains(brand))
+        .filter(|brand| host.contains(brand) || squashed.contains(brand))
         .collect()
+}
+
+fn squash_common_typos(value: &str) -> String {
+    let chars: Vec<char> = value.chars().collect();
+    let mut out = String::with_capacity(value.len());
+    let mut index = 0;
+
+    while index < chars.len() {
+        if index + 1 < chars.len() {
+            match (chars[index], chars[index + 1]) {
+                ('r', 'n') => {
+                    out.push('m');
+                    index += 2;
+                    continue;
+                }
+                ('v', 'v') => {
+                    out.push('w');
+                    index += 2;
+                    continue;
+                }
+                ('c', 'l') => {
+                    out.push('d');
+                    index += 2;
+                    continue;
+                }
+                _ => {}
+            }
+        }
+
+        match chars[index] {
+            '0' => out.push('o'),
+            '1' => out.push('l'),
+            '3' => out.push('e'),
+            '5' => out.push('s'),
+            '7' => out.push('t'),
+            ch => out.push(ch),
+        }
+
+        index += 1;
+    }
+
+    out
 }
 
 pub fn brand_legit_domain(brand: &str) -> Option<&'static str> {
