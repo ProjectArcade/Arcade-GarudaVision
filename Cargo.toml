@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "crates/garuda-core",
+    "crates/garuda-lists",
+    "crates/garuda-ffi",
+    "crates/garuda-cli",
+]
+resolver = "2"

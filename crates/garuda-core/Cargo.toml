@@ -1,0 +1,9 @@
+[package]
+name = "garuda-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+garuda-lists = { path = "../garuda-lists" }
+serde = { version = "1", features = ["derive"] }
+unicode-normalization = "0.1"

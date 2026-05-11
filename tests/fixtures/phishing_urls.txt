@@ -1,0 +1,3 @@
+google-account-verify.vercel.app
+verificationforgoogleform.vercel.app
+rnicrosoft.com

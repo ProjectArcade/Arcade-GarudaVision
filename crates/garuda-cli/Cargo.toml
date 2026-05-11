@@ -1,0 +1,12 @@
+[package]
+name = "garuda-cli"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "garuda-cli"
+path = "src/main.rs"
+
+[dependencies]
+garuda-core = { path = "../garuda-core" }
+garuda-lists = { path = "../garuda-lists" }

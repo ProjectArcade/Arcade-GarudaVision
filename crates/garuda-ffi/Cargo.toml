@@ -1,0 +1,11 @@
+[package]
+name = "garuda-ffi"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+garuda-core = { path = "../garuda-core" }
+garuda-lists = { path = "../garuda-lists" }

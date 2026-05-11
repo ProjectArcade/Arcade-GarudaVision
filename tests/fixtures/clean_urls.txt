@@ -1,0 +1,2 @@
+myapp.vercel.app
+portfolio.netlify.app

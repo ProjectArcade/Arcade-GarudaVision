@@ -1,0 +1,8 @@
+vercel.app
+netlify.app
+github.io
+pages.dev
+glitch.me
+replit.dev
+render.com
+fly.dev
