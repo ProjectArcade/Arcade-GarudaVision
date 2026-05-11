@@ -176,4 +176,44 @@ mod tests {
         assert!(reasons.iter().any(|r| r.contains("brand_impersonation")));
         assert!(reasons.iter().any(|r| r.contains("keyword:kyc")));
     }
+
+    #[test]
+    fn hosting_suffix_does_not_trigger_unrelated_brand() {
+        let (_score, reasons) = analyse("https://kotak-netbanking-login.netlify.app");
+        assert!(
+            reasons.iter().all(|r| {
+                !(r == "brand_impersonation:netflix"
+                    || r == "brand_impersonation:zoom"
+                    || r == "brand_impersonation:apple")
+            }),
+            "hosting or TLD labels should not map to unrelated brands: {:?}",
+            reasons
+        );
+    }
+
+    #[test]
+    fn github_typo_gets_high_confidence_brand_reason() {
+        let (score, reasons) = analyse("https://githuub.com");
+        assert!(
+            reasons.iter().any(|r| r == "brand_impersonation:github"),
+            "expected github brand reason, got {:?}",
+            reasons
+        );
+        assert!(score >= 40, "known-brand typo should not stay clean, got {}", score);
+    }
+
+    #[test]
+    fn gitlab_impersonation_is_not_misattributed() {
+        let (_score, reasons) = analyse("https://gitlab-account-security.pages.dev");
+        assert!(
+            reasons.iter().any(|r| r == "brand_impersonation:gitlab"),
+            "expected gitlab brand reason, got {:?}",
+            reasons
+        );
+        assert!(
+            reasons.iter().all(|r| r != "brand_impersonation:github"),
+            "gitlab should not be mapped to github: {:?}",
+            reasons
+        );
+    }
 }

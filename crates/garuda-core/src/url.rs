@@ -9,7 +9,7 @@ const BRAND_RULES: &[(&str, &str)] = &[
     ("apple", "apple.com"),
     ("facebook", "facebook.com"),
     ("instagram", "instagram.com"),
-    ("twitter", "twitter.com"),
+    ("twitter", "x.com"),
     ("netflix", "netflix.com"),
     ("sbi", "sbi.co.in"),
     ("hdfc", "hdfcbank.com"),
@@ -17,6 +17,34 @@ const BRAND_RULES: &[(&str, &str)] = &[
     ("icici", "icicibank.com"),
     ("airtel", "airtel.in"),
     ("jio", "jio.com"),
+    ("phonepe", "phonepe.com"),
+    ("axis", "axisbank.com"),
+    ("axisbank", "axisbank.com"),
+    ("gpay", "pay.google.com"),
+    ("googlepay", "pay.google.com"),
+    ("whatsapp", "whatsapp.com"),
+    ("coinbase", "coinbase.com"),
+    ("binance", "binance.com"),
+    ("linkedin", "linkedin.com"),
+    ("telegram", "telegram.org"),
+    ("openai", "openai.com"),
+    ("flipkart", "flipkart.com"),
+    ("yahoo", "yahoo.com"),
+    ("zoom", "zoom.us"),
+    ("dropbox", "dropbox.com"),
+    ("onedrive", "onedrive.live.com"),
+    ("github", "github.com"),
+    ("gitlab", "gitlab.com"),
+    ("kotak", "kotak.com"),
+    ("myntra", "myntra.com"),
+    ("meesho", "meesho.com"),
+    ("notion", "notion.so"),
+    ("metamask", "metamask.io"),
+    ("phantom", "phantom.app"),
+    ("trustwallet", "trustwallet.com"),
+    ("aadhaar", "uidai.gov.in"),
+    ("vi", "myvi.in"),
+    ("bsnl", "bsnl.co.in"),
 ];
 
 #[derive(Debug, Clone)]
@@ -106,20 +134,51 @@ pub fn brand_candidates(host: &str) -> Vec<&'static str> {
     let mut candidates = brand_list::brands()
         .filter(|brand| host.contains(brand) || squashed.contains(brand))
         .collect::<Vec<_>>();
-    
-    for brand in brand_list::brands() {
-        if !candidates.contains(&brand) && is_brand_typo(&host, brand) {
-            candidates.push(brand);
+
+    for label in brandish_host_labels(&host) {
+        for brand in brand_list::brands() {
+            if !candidates.contains(&brand) && is_brand_typo(label, brand) {
+                candidates.push(brand);
+            }
         }
     }
-    
+
     candidates
 }
 
+fn brandish_host_labels(host: &str) -> Vec<&str> {
+    const NOISE_LABELS: &[&str] = &[
+        "com", "org", "net", "in", "co", "io", "ai", "app", "dev", "gov", "edu", "nic",
+        "ac", "res", "www", "vercel", "pages", "netlify", "web", "firebaseapp",
+    ];
+
+    host.split(['.', '-', '_'])
+        .filter(|label| !label.is_empty())
+        .filter(|label| !NOISE_LABELS.contains(label))
+        .filter(|label| label.len() >= 5)
+        .collect()
+}
+
 fn is_brand_typo(test_str: &str, brand: &str) -> bool {
-    let distance = levenshtein_distance(test_str, brand);
-    let max_allowed = (brand.len() as f32 * 0.3).ceil() as usize;
-    distance <= max_allowed && distance > 0
+    if brand.len() < 5 {
+        return false;
+    }
+
+    let normalized_test: String = test_str.chars().filter(|c| c.is_ascii_alphanumeric()).collect();
+    let normalized_brand: String = brand.chars().filter(|c| c.is_ascii_alphanumeric()).collect();
+
+    if normalized_test.len() < 5 {
+        return false;
+    }
+
+    let len_diff = normalized_test.len().abs_diff(normalized_brand.len());
+    if len_diff > 2 {
+        return false;
+    }
+
+    let distance = levenshtein_distance(&normalized_test, &normalized_brand);
+    let max_allowed = (normalized_brand.len() as f32 * 0.30).ceil() as usize;
+    distance > 0 && distance <= max_allowed.max(1)
 }
 
 fn levenshtein_distance(s1: &str, s2: &str) -> usize {
