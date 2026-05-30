@@ -162,7 +162,7 @@ fn rules_path() -> PathBuf {
         return PathBuf::from(path);
     }
 
-    PathBuf::from("lists/brands.json")
+    PathBuf::from("lists/brands.txt")
 }
 
 fn cache_path() -> PathBuf {
@@ -171,10 +171,10 @@ fn cache_path() -> PathBuf {
     }
 
     if let Ok(home) = std::env::var("HOME") {
-        return PathBuf::from(home).join(".cache/garuda/brands.json");
+        return PathBuf::from(home).join(".cache/garuda/brands.txt");
     }
 
-    PathBuf::from(".garuda/brands.json")
+    PathBuf::from(".garuda/brands.txt")
 }
 
 fn write_rules_file(path: &Path, rules: &BrandRulesFile) -> std::io::Result<()> {
@@ -183,7 +183,8 @@ fn write_rules_file(path: &Path, rules: &BrandRulesFile) -> std::io::Result<()> 
     }
 
     let json = serde_json::to_string_pretty(rules)?;
-    let tmp_path = path.with_extension("json.tmp");
+    let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("tmp");
+    let tmp_path = path.with_extension(format!("{ext}.tmp"));
     fs::write(&tmp_path, json)?;
     fs::rename(tmp_path, path)?;
     Ok(())
@@ -191,20 +192,99 @@ fn write_rules_file(path: &Path, rules: &BrandRulesFile) -> std::io::Result<()> 
 
 fn load_rules_from_path(path: &Path) -> Option<BrandRules> {
     let contents = fs::read_to_string(path).ok()?;
-    let parsed = serde_json::from_str::<BrandRulesFile>(&contents).ok()?;
+    
+    // Backwards-compatibility with legacy JSON format
+    if contents.trim_start().starts_with('{') {
+        let parsed = serde_json::from_str::<BrandRulesFile>(&contents).ok()?;
 
-    if let Some(checksum) = &parsed.checksum {
-        if checksum != &checksum_rules(&parsed.rules) {
-            return None;
+        if let Some(checksum) = &parsed.checksum {
+            if checksum != &checksum_rules(&parsed.rules) {
+                return None;
+            }
         }
+
+        let metadata = fs::metadata(path).ok();
+        let modified = metadata.and_then(|meta| meta.modified().ok());
+
+        return Some(BrandRules {
+            version: parsed.version,
+            rules: parsed.rules,
+            source_path: path.to_path_buf(),
+            last_modified: modified,
+        });
+    }
+
+    // Parse the new structured tabular text format
+    let mut rules = Vec::new();
+    let mut version = "0.0.0".to_string();
+
+    for line in contents.lines() {
+        let line = line.trim();
+        if line.is_empty() {
+            continue;
+        }
+
+        if line.starts_with('#') {
+            if let Some(idx) = line.to_lowercase().find("version:") {
+                let v_part = &line[idx + 8..];
+                let v = v_part.trim_matches(|c: char| c.is_whitespace() || c == ')');
+                version = v.to_string();
+            }
+            continue;
+        }
+
+        let content_part = line.split('#').next().unwrap_or("").trim();
+        if content_part.is_empty() {
+            continue;
+        }
+
+        let parts: Vec<&str> = content_part.split('|').map(|s| s.trim()).collect();
+        if parts.len() < 5 {
+            continue;
+        }
+
+        let canonical = parts[0].to_string();
+        let domain = parts[1].to_string();
+        let aliases: Vec<String> = parts[2]
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect();
+
+        let category_str = parts[3].to_lowercase();
+        let category = match category_str.as_str() {
+            "bank" => BrandCategory::Bank,
+            "fintech" => BrandCategory::Fintech,
+            "telecom" => BrandCategory::Telecom,
+            "social" => BrandCategory::Social,
+            "ecommerce" => BrandCategory::Ecommerce,
+            "government" => BrandCategory::Government,
+            "crypto" => BrandCategory::Crypto,
+            "saas" => BrandCategory::SaaS,
+            "tech" => BrandCategory::Tech,
+            _ => continue,
+        };
+
+        let risk = match parts[4].parse::<u8>() {
+            Ok(r) => r,
+            Err(_) => continue,
+        };
+
+        rules.push(BrandRule {
+            canonical,
+            domain,
+            aliases,
+            category,
+            risk,
+        });
     }
 
     let metadata = fs::metadata(path).ok();
     let modified = metadata.and_then(|meta| meta.modified().ok());
 
     Some(BrandRules {
-        version: parsed.version,
-        rules: parsed.rules,
+        version,
+        rules,
         source_path: path.to_path_buf(),
         last_modified: modified,
     })

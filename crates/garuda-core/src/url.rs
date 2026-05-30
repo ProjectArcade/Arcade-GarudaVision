@@ -38,6 +38,7 @@ pub struct UrlParts {
     pub scheme: String,
     pub host: String,
     pub path_and_query: String,
+    pub has_userinfo: bool,
 }
 
 /// Returns true if the URL uses a dangerous scheme (data:, javascript:, blob:, etc.)
@@ -76,25 +77,23 @@ pub fn parse_url(input: &str) -> UrlParts {
         .strip_prefix("https://")
         .or_else(|| normalized.strip_prefix("http://"))
         .unwrap_or(&normalized);
-    let (authority, path_and_query) = match without_scheme.split_once('/') {
-        Some((authority, rest)) => (authority, format!("/{}", rest)),
-        None => (without_scheme, String::new()),
+    let (authority, path_and_query) = {
+        let mut auth = without_scheme;
+        let mut rest = String::new();
+        if let Some(idx) = without_scheme.find(['/', '?', '#']) {
+            auth = &without_scheme[..idx];
+            rest = without_scheme[idx..].to_string();
+        }
+        (auth, rest)
     };
+    let has_userinfo = authority.contains('@');
     let without_credentials = authority.rsplit_once('@').map(|(_, tail)| tail).unwrap_or(authority);
     let without_www = without_credentials.strip_prefix("www.").unwrap_or(without_credentials);
 
-    let host = match without_www.split_once('/') {
-        Some((host, _)) => host,
-        None => without_www,
-    };
-
-    let host = host
-        .split(['?', '#'])
-        .next()
-        .unwrap_or(host)
+    let host = without_www
         .split(':')
         .next()
-        .unwrap_or(host)
+        .unwrap_or(without_www)
         .trim_end_matches('.')
         .to_string();
 
@@ -104,6 +103,7 @@ pub fn parse_url(input: &str) -> UrlParts {
         scheme,
         host,
         path_and_query,
+        has_userinfo,
     }
 }
 
@@ -166,8 +166,34 @@ pub fn is_domain_or_subdomain(host: &str, domain: &str) -> bool {
     host == domain || host.ends_with(&format!(".{domain}"))
 }
 
+pub fn is_brand_owned_gtld(host: &str) -> bool {
+    let host = host.trim().to_lowercase();
+    host == "google" || host.ends_with(".google")
+        || host == "apple" || host.ends_with(".apple")
+        || host == "amazon" || host.ends_with(".amazon")
+        || host == "microsoft" || host.ends_with(".microsoft")
+}
+
+pub fn is_brand_owned_gtld_for_brand(host: &str, brand: &str) -> bool {
+    let host = host.trim().to_lowercase();
+    let brand = brand.trim().to_lowercase();
+    if (host == "google" || host.ends_with(".google")) && brand == "google" {
+        return true;
+    }
+    if (host == "apple" || host.ends_with(".apple")) && brand == "apple" {
+        return true;
+    }
+    if (host == "amazon" || host.ends_with(".amazon")) && brand == "amazon" {
+        return true;
+    }
+    if (host == "microsoft" || host.ends_with(".microsoft")) && brand == "microsoft" {
+        return true;
+    }
+    false
+}
+
 pub fn is_safe_domain(host: &str) -> bool {
-    safe_list::is_safe(host)
+    is_brand_owned_gtld(host) || safe_list::is_safe(host)
 }
 
 pub fn is_free_platform(host: &str) -> bool {
@@ -208,6 +234,9 @@ pub fn find_brand_matches(host: &str) -> Vec<BrandMatch> {
 
     for rule in rules.rules.iter() {
         if is_domain_or_subdomain(&host, &rule.domain) {
+            continue;
+        }
+        if is_brand_owned_gtld_for_brand(&host, &rule.canonical) {
             continue;
         }
 
@@ -282,10 +311,28 @@ fn build_match(rule: &BrandRule, match_type: MatchType, confidence: f32) -> Bran
 }
 
 fn tokenize_host(host: &str) -> Vec<String> {
-    host.split(['.', '-', '_'])
-        .filter(|token| !token.is_empty())
-        .flat_map(|token| split_compound_token(token))
-        .collect()
+    let mut tokens = Vec::new();
+    
+    // 1. Add full labels split only by dot (normalized to strip hyphens/underscores)
+    for label in host.split('.') {
+        if !label.is_empty() {
+            tokens.push(normalize_token(label));
+            tokens.push(label.to_lowercase());
+        }
+    }
+    
+    // 2. Add sub-tokens split by hyphen, underscore, and dot
+    for part in host.split(['.', '-', '_']) {
+        if !part.is_empty() {
+            tokens.extend(split_compound_token(part));
+        }
+    }
+    
+    // Deduplicate and remove empty
+    tokens.retain(|t| !t.is_empty());
+    tokens.sort();
+    tokens.dedup();
+    tokens
 }
 
 pub fn tokenize_for_keywords(value: &str) -> Vec<String> {
@@ -393,7 +440,7 @@ fn is_noise_token(token: &str, host: &str) -> bool {
     const NOISE: &[&str] = &[
         "com", "org", "net", "in", "co", "io", "ai", "app", "dev", "gov", "edu", "nic",
         "ac", "res", "www", "vercel", "pages", "netlify", "web", "firebaseapp",
-        "onrender", "herokuapp", "appspot",
+        "onrender", "herokuapp", "appspot", "cloud", "click",
     ];
 
     if NOISE.contains(&token) {
@@ -433,6 +480,12 @@ fn strict_levenshtein_match(token: &str, brand: &str) -> Option<usize> {
 
     let distance = levenshtein_distance(token, brand);
     if distance == 0 || distance > 2 {
+        return None;
+    }
+
+    // For short brand names (length 5), restrict Levenshtein distance to 1
+    // to prevent loose matching errors on generic keywords (e.g. click matching slack)
+    if brand.len() == 5 && distance > 1 {
         return None;
     }
 
@@ -664,7 +717,11 @@ pub fn analyze_context(
     reasons: &[String],
     brand_matches: &[BrandMatch],
 ) -> SuspiciousContext {
-    let combined = format!("{}{}", host.to_lowercase(), path_query.to_lowercase());
+    let path = match path_query.split_once('?') {
+        Some((p, _)) => p,
+        None => path_query,
+    };
+    let combined = format!("{}{}", host.to_lowercase(), path.to_lowercase());
     
     let financial_keywords = &[
         "bank", "payment", "wallet", "refund", "kyc", "pan", "ifsc", "netbanking",

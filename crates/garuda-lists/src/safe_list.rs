@@ -1,15 +1,7 @@
-fn entries() -> impl Iterator<Item = &'static str> {
-    include_str!("../../../lists/safe_top10k.txt")
-        .lines()
-        .map(str::trim)
-        .filter(|line| !line.is_empty())
-}
+use crate::engine;
 
-pub fn safe_domains() -> impl Iterator<Item = &'static str> {
-    entries()
-}
-
+/// Check if a domain (or any parent domain) is a known safe domain.
+/// Uses the high-performance Bloom filter + FxHashSet engine for O(1) lookups.
 pub fn is_safe(domain: &str) -> bool {
-    let domain = domain.trim().to_lowercase();
-    entries().any(|line| domain == line || domain.ends_with(&format!(".{line}")))
+    engine::is_known_domain(domain)
 }

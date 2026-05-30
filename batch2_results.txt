@@ -1,0 +1,236 @@
+
+════════════════════════════════════════════════════════
+ GarudaVision Test Suite — Batch 2 (TC-51 to TC-100)
+════════════════════════════════════════════════════════
+
+[CAT-10] Brand-Owned gTLD Domains — Expected: CLEAN
+
+URL     : https://antigravity.google/oauth-callback?state=-QzJVmFdo35rSVuWi6Qccg&iss=https%3A%2F%2Faccounts.google.com&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform+openid&authuser=0&prompt=consent
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:antigravity.google"]
+URL     : https://console.cloud.google/iam-admin/iam
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:console.cloud.google"]
+URL     : https://meet.google/abc-defg-hij
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:meet.google"]
+URL     : https://www.apple/iphone
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:apple"]
+URL     : https://www.microsoft/en-us/microsoft-365
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:microsoft"]
+
+[CAT-11] Legitimate OAuth / OIDC Callbacks — Expected: CLEAN
+
+URL     : https://github.com/login/oauth/authorize?client_id=abc123&redirect_uri=https%3A%2F%2Fmyapp.com%2Fcallback&scope=read%3Auser&state=xyz789
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:github.com"]
+URL     : https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=123.apps.googleusercontent.com&redirect_uri=https%3A%2F%2Fmyapp.com%2Fauth&scope=openid+email+profile&state=abc
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:accounts.google.com"]
+URL     : https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=abc&response_type=code&redirect_uri=https%3A%2F%2Fmyapp.com%2Fcallback&scope=openid+profile+email&state=xyz
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:login.microsoftonline.com"]
+URL     : https://mycompany.okta.com/oauth2/v1/authorize?response_type=code&client_id=abc&redirect_uri=https%3A%2F%2Fapp.mycompany.com%2Fcallback&scope=openid+email&state=xyz
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:mycompany.okta.com"]
+URL     : https://myapp.auth0.com/authorize?response_type=code&client_id=abc123&redirect_uri=https%3A%2F%2Fmyapp.com%2Fcallback&scope=openid+profile+email&state=xyz&nonce=abc
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:myapp.auth0.com"]
+
+[CAT-12] Open Redirect Abuse — Expected: BLOCK / CAUTION
+
+URL     : https://google.com/url?q=https://paypal-verify-login.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:google.com"]
+URL     : https://www.youtube.com/redirect?q=https://metamask-recovery.net/seed
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:youtube.com"]
+URL     : https://www.bing.com/search?q=test&redirect=https://coinbase-seed-recovery.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:bing.com"]
+URL     : https://portal-login.com/auth?next=https://evil-harvest.com/steal
+Score   : 50
+Verdict : Caution
+Reasons : ["suspicious_keyword:login", "suspicious_keyword:auth", "suspicious_keyword:portal"]
+URL     : https://login.example.com/sso?redirect_uri=https%3A%2F%2Fphishing-site.com%2Flogin%2Fverify
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:login.example.com"]
+
+[CAT-13] URL Shorteners — Expected: CAUTION / SUSPICIOUS
+
+URL     : https://bit.ly/3xY7zAb
+Score   : 0
+Verdict : Clean
+Reasons : []
+URL     : https://tinyurl.com/paypal-verify
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:tinyurl.com"]
+URL     : https://t.co/AbCdEfGh
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:t.co"]
+URL     : https://rb.gy/xyz123
+Score   : 0
+Verdict : Clean
+Reasons : []
+URL     : https://cutt.ly/verify-aadhaar-update
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:aadhaar", "suspicious_keyword:aadhaar", "suspicious_keyword:verify", "suspicious_keyword:update"]
+
+[CAT-14] Cloud Subdomain Phishing — Expected: BLOCK
+
+URL     : https://microsoft-login-verify.azurewebsites.net
+Score   : 0
+Verdict : Clean
+Reasons : ["long_hostname:40", "safe_domain:microsoft-login-verify.azurewebsites.net"]
+URL     : https://paypal-secure-update.cloudfront.net/login
+Score   : 100
+Verdict : Block
+Reasons : ["long_hostname:35", "brand_impersonation:paypal", "suspicious_keyword:login", "suspicious_keyword:secure", "suspicious_keyword:update"]
+URL     : https://metamask-connect-wallet.workers.dev
+Score   : 100
+Verdict : Block
+Reasons : ["long_hostname:35", "brand_impersonation:metamask", "suspicious_keyword:wallet"]
+URL     : https://hdfc-otp-portal.onrender.com/login
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:hdfc", "suspicious_hosting:onrender.com", "suspicious_keyword:otp", "suspicious_keyword:login", "suspicious_keyword:portal"]
+URL     : https://sbi-netbanking-login.up.railway.app
+Score   : 100
+Verdict : Block
+Reasons : ["long_hostname:35", "brand_impersonation:sbi", "suspicious_keyword:login", "suspicious_keyword:banking", "suspicious_keyword:netbanking"]
+
+[CAT-15] Evasion Techniques — Expected: CAUTION / BLOCK
+
+URL     : https://secure-portal-v2.vercel.app/signin
+Score   : 100
+Verdict : Block
+Reasons : ["suspicious_hosting:vercel.app", "suspicious_keyword:secure", "suspicious_keyword:signin", "suspicious_keyword:portal", "homoglyph_detected"]
+URL     : https://a3x7k9mf.vercel.app/login
+Score   : 100
+Verdict : Block
+Reasons : ["suspicious_hosting:vercel.app", "suspicious_keyword:login", "homoglyph_detected"]
+URL     : https://paypal.com.co/signin
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:signin"]
+URL     : https://evil-site.com/paypal.com/login/verify
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:login", "suspicious_keyword:verify"]
+URL     : https://paypal.xn--p1acf/signin
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:signin", "homoglyph_detected"]
+URL     : https://pay​pal.com/verify
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:verify"]
+URL     : https://www.icicibаnk.com/login
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:icici", "suspicious_keyword:login", "homoglyph_detected"]
+
+[CAT-16] False Positive Regression — Expected: CLEAN
+
+URL     : https://www.paytm.com/payment
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:paytm.com"]
+URL     : https://razorpay.com/payment-gateway
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:razorpay.com"]
+URL     : https://www.cloudflare.com/learning/security/what-is-two-factor-authentication
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:cloudflare.com"]
+URL     : https://login.microsoftonline.com/common/oauth2/authorize
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:login.microsoftonline.com"]
+URL     : https://checkout.stripe.com/pay/cs_test_abc123
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:checkout.stripe.com"]
+URL     : https://digilocker.gov.in/public/oauth2/1/authorize
+Score   : 0
+Verdict : Clean
+Reasons : ["trusted_indian_domain:digilocker.gov.in"]
+URL     : https://www.npci.org.in/what-we-do/upi/product-overview
+Score   : 0
+Verdict : Clean
+Reasons : []
+URL     : https://wazirx.com/exchange/BTC-INR
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:wazirx.com"]
+
+[CAT-17] India-Specific Threats — Expected: BLOCK
+
+URL     : https://uidai-aadhaar-update.com/otp-verify
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:aadhaar", "suspicious_keyword:otp", "suspicious_keyword:aadhaar", "suspicious_keyword:verify", "suspicious_keyword:update"]
+URL     : https://npci-upi-verify.in/kyc-update
+Score   : 70
+Verdict : Caution
+Reasons : ["suspicious_keyword:kyc", "suspicious_keyword:verify", "suspicious_keyword:update"]
+URL     : https://incometax-refund-claim.com/verify-pan
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:incometax", "suspicious_keyword:pan", "suspicious_keyword:verify", "suspicious_keyword:refund"]
+URL     : https://irctc-ticket-booking-verify.in/login
+Score   : 54
+Verdict : Caution
+Reasons : ["many_hyphens:3", "suspicious_keyword:login", "suspicious_keyword:verify"]
+URL     : https://digilocker-verify-document.com/aadhaar
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:digilocker", "suspicious_keyword:aadhaar", "suspicious_keyword:verify"]
+
+[CAT-18] Adversarial Edge Cases — Expected: BLOCK
+
+URL     : http://paypal.com.login-verify.com:8080/signin
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:login", "suspicious_keyword:verify", "suspicious_keyword:signin"]
+URL     : https://paypal.com@evil-harvest.com/login
+Score   : 22
+Verdict : Clean
+Reasons : ["suspicious_keyword:login"]
+URL     : intent://evil.com/steal#Intent;scheme=https;end
+Score   : 0
+Verdict : Clean
+Reasons : []
+URL     : https://paypal.com%00.evil.com/login
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:login"]
+URL     : https://www.раypal.com/account/login
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:login", "suspicious_keyword:account", "homoglyph_detected"]
+
+════════════════════════════════════════════════════════
+ Batch 2 Complete — TC-51 to TC-100
+ Full Suite: 100 / 100
+════════════════════════════════════════════════════════

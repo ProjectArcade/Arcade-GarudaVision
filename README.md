@@ -1,277 +1,74 @@
 # GarudaVision
 
-GarudaVision is a lightweight phishing detection engine written in Rust that detects typo-squatting, homoglyph attacks, hosted phishing kits, enterprise impersonation, banking scams, crypto wallet phishing, and suspicious authentication portals using deterministic layered heuristics.
-
-The engine focuses on:
-
-* high detection quality
-* low false positives
-* explainable scoring
-* dynamic rule intelligence
-* real-world phishing infrastructure patterns
+## 1. Introduction
+**GarudaVision** is a lightweight, high-performance phishing detection engine written in Rust. It utilizes deterministic layered heuristics to identify typosquatting, homoglyph attacks, hosted phishing kits, enterprise SSO/OAuth spoofing, banking scams, and crypto wallet phishing in real time.
 
 ---
 
-# Features
-
-* Layered phishing detection pipeline
-* Brand impersonation detection
-* Homoglyph normalization
-* Typo-domain analysis
-* Enterprise SSO and OAuth phishing detection
-* Banking and fintech phishing heuristics
-* Crypto wallet scam detection
-* Government portal impersonation detection
-* Suspicious keyword intelligence
-* Hosted phishing kit detection
-* Dynamic JSON-based intelligence loading
-* Hot reload + remote updater support
-* Explainable scoring and verdicts
-* Regression testing suite
+## 2. Why GarudaVision is Needed
+Traditional phishing detection relies heavily on reactive blacklists (e.g., Google Safe Browsing), which fail to stop newly registered zero-day phishing domains. Modern attackers spin up ephemeral phishing sites on free hosting services (Vercel, Netlify, Github Pages) that last only a few hours. GarudaVision solves this by proactively evaluating structural and contextual signals inside URLs to assign real-time risk scores without relying on pre-existing blacklists.
 
 ---
 
-# Detection Capabilities
+## 3. How It Identifies Phishing and Risky Sites
+GarudaVision processes incoming URLs through a layered analysis pipeline:
+1. **URI Scheme Validation**: Immediately flags dangerous protocols (`javascript:`, `data:`, `blob:`, etc.).
+2. **Structural Checks**: Analyzes hostname length, hyphen count, subdomains count, and presence of IP addresses as hostnames.
+3. **Punycode & Homoglyph Normalization**: Detects visual character substitutions (e.g., replacing `l` with `I`, `0` with `O`, or using Cyrillic lookalikes like `раураі.сом` for `paypal.com`).
+4. **Brand Impersonation Detection**: Performs fuzzy, levenshtein-distance, and token-based checks against high-value target brands (e.g. `githuub.com` vs `github.com`).
+5. **Suspicious Keyword Identification**: Targets critical phishing keywords (`login`, `verify`, `otp`, `secure`, `recovery`, `seed`).
+6. **Contextual Risk Multipliers**: Amplifies scores when risky combinations occur together, such as brand containment combined with free hosting (e.g., `paypal-kyc-verify.vercel.app`).
 
-GarudaVision detects:
+---
 
-## Typo Squatting
+## 4. Why It is Efficient at Scale (Handling Billions of Internet Sites)
+To check billions of domains globally without slowing down network requests or suffering from memory bloat, GarudaVision implements a multi-tier whitelisting engine:
+* **Bloom Filter Rejection**: Utilizes a highly compact Bloom Filter (using `FxHasher` and double hashing) sized dynamically based on a whitelist of over 10,000 top global domains (derived from OpenDNS Top 10k). This rejects clean, legitimate traffic in $O(1)$ time with negligible CPU and memory overhead (requiring only ~13 KB of L1 cache-friendly space).
+* **Exact Hash Matching**: Legitimate domains that trigger the Bloom filter are validated against a high-speed `FxHashSet` to eliminate False Positives.
+* **Fast Subdomain Walking**: Parent domain verification (e.g. checking `mail.google.com` $\rightarrow$ `google.com`) is performed through label parsing instead of slow binary searches or prefix comparisons, achieving verification in nanoseconds.
 
-Examples:
+---
 
-```text
-paypa1.com
-rnicrosoft.com
-linkedln.com
-g00gle.com
-```
-
-## Hosted Phishing Kits
-
-Examples:
-
-```text
-paypal-login.vercel.app
-secure-sbi-login.pages.dev
-google-drive-share.web.app
-```
-
-## Enterprise Phishing
-
-Examples:
+## 5. Architecture of GarudaVision
+The codebase is structured as a modular workspace:
+* **[garuda-lists](Arcade-GarudaVision/crates/garuda-lists)**: Manages Bloom filters, whitelists, and category classifications (`finance`, `government`, `tech`, `media`, `commerce`).
+* **[garuda-core](Arcade-GarudaVision/crates/garuda-core)**: Contains the central analyzer, tokenization pipeline, homoglyph maps, brand rules, and scoring modules.
+* **[garuda-cli](Arcade-GarudaVision/crates/garuda-cli)**: Provides a command-line interface for manual analysis and validation.
+* **[garuda-ffi](Arcade-GarudaVision/crates/garuda-ffi)**: Exposes C-compatible bindings for integration with other languages.
 
 ```text
-office365-verification-center.com
-login.microsoftonline-support.com
-githubauth-security-check.com
-```
-
-## Banking / Fintech Phishing
-
-Examples:
-
-```text
-hdfc-kyc-update.pages.dev
-axisbank-otp-auth.firebaseapp.com
-paytm-wallet-security.vercel.app
-```
-
-## Crypto Wallet Scams
-
-Examples:
-
-```text
-metamask-wallet-recovery.net
-walletconnect-metamask.net
-trustwallet-dapps-connect.org
+Incoming URL 
+  → Normalize & Decode (NFKC, Percent Decode)
+  → Whitelist Query (O(1) Bloom Filter + Exact Hash Match)
+  → Heuristics Pipeline (Structure, Brand, Homoglyph, Keywords)
+  → Contextual Multiplier 
+  → Score (0 - 100) & Verdict Generation (Clean, Suspicious, Caution, Block)
 ```
 
 ---
 
-# Architecture
+## 6. Build and Test
 
-GarudaVision uses deterministic layered heuristics instead of unrestricted fuzzy matching.
+### Requirements
+- Rust Stable
+- Cargo
 
-Pipeline:
-
-```text
-normalize
-→ tokenize
-→ alias extraction
-→ homoglyph normalization
-→ typo analysis
-→ contextual scoring
-→ verdict generation
-```
-
-Core components:
-
-```text
-src/
-├── analyzer/
-├── detectors/
-├── intelligence/
-├── models/
-└── tests/
-```
-
----
-
-# Dynamic Intelligence System
-
-Brand intelligence is stored externally in JSON files.
-
-Example:
-
-```json
-{
-  "canonical": "google",
-  "domain": "google.com",
-  "aliases": ["gmail", "gdrive", "workspace"],
-  "category": "tech",
-  "risk": 90
-}
-```
-
-Supported intelligence files:
-
-```text
-lists/
-├── brands.json
-├── keywords.json
-├── hosting.json
-├── homoglyphs.json
-├── typo_aliases.json
-└── metadata.json
-```
-
-Rules can be:
-
-* updated without recompiling
-* hot reloaded
-* remotely fetched from GitHub raw URLs
-
----
-
-# Build
-
-## Requirements
-
-* Rust stable
-* Cargo
-
-Install Rust:
-
-```bash
-curl https://sh.rustup.rs -sSf | sh
-```
-
-Clone repository:
-
-```bash
-git clone https://github.com/ProjectArcade/Arcade-GarudaVision.git
-cd Arcade-GarudaVision
-```
-
-Build project:
-
+### Build the Project
 ```bash
 cargo build --release
 ```
 
-Run tests:
-
+### Run Tests
 ```bash
-cargo test -p garuda-core
+cargo test
+```
+
+### Run CLI Validation Example
+```bash
+cargo run -p garuda-cli -- check "https://www.rnicrosoft.com/login"
 ```
 
 ---
 
-# Running the CLI
-
-Basic usage:
-
-```bash
-cargo run -p garuda-cli -- check "https://www.rnicrosoft.com/en-in"
-```
-
-Example output:
-
-```text
-URL     : https://www.rnicrosoft.com/en-in
-Score   : 100
-Verdict : Block
-Reasons : [
-  "brand_impersonation:microsoft",
-  "homoglyph_detected"
-]
-```
-
----
-
-# Dynamic Brand Intelligence
-
-Use external intelligence files:
-
-```bash
-export GARUDA_BRANDS_PATH=lists/brands.json
-```
-
-Enable hot reload:
-
-```bash
-export GARUDA_BRANDS_HOT_RELOAD=true
-```
-
-Configure remote updater:
-
-```bash
-export GARUDA_BRANDS_URL="https://raw.githubusercontent.com/<repo>/main/lists/brands.json"
-export GARUDA_BRANDS_UPDATE_INTERVAL_SECS=3600
-export GARUDA_BRANDS_CACHE_PATH=lists/cache/brands.json
-```
-
----
-
-# Regression Testing
-
-Run the regression suite:
-
-```bash
-cargo test -p garuda-core
-```
-
-Manual phishing validation:
-
-```bash
-cargo run -p garuda-cli -- check "https://paypa1.com/login"
-cargo run -p garuda-cli -- check "https://secure-sbi-login.vercel.app"
-cargo run -p garuda-cli -- check "https://metamask-wallet-recovery.net"
-cargo run -p garuda-cli -- check "https://githubauth-security-check.com"
-```
-
-Legitimate sanity checks:
-
-```bash
-cargo run -p garuda-cli -- check "https://github.com"
-cargo run -p garuda-cli -- check "https://workspace.google.com"
-cargo run -p garuda-cli -- check "https://aws.amazon.com"
-```
-
----
-
-# Verdict Thresholds
-
-| Score | Verdict    |
-| ----- | ---------- |
-| 0-24  | Clean      |
-| 25-49 | Suspicious |
-| 50-79 | Caution    |
-| 80+   | Block      |
-
----
-
-
-# License
-
-GNU GENERAL PUBLIC LICENSE
+## 7. License
+This project is licensed under the **GNU General Public License**.

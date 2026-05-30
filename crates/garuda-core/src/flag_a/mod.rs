@@ -15,6 +15,12 @@ pub fn analyse(url: &str) -> (u8, Vec<String>) {
     }
 
     let parts = url::parse_url(url);
+
+    // Fast-path malware/blocklist check
+    if garuda_lists::malware_list::is_blocked(&parts.host) {
+        return (100, vec!["malicious_blocklist_match".to_string()]);
+    }
+
     let mut score: u8 = 0;
     let mut reasons = Vec::new();
 
@@ -74,8 +80,17 @@ pub fn analyse(url: &str) -> (u8, Vec<String>) {
     score = score.saturating_add(s);
     reasons.extend(r);
 
-    let combined = url::normalize_segments(&parts.host, &parts.path_and_query);
-    let (s, r) = keywords::check(&combined);
+    let (path, query) = match parts.path_and_query.split_once('?') {
+        Some((p, q)) => (p.to_string(), q.to_string()),
+        None => (parts.path_and_query.clone(), String::new()),
+    };
+    let combined_host_path = format!("{}{}", parts.host.to_lowercase(), path.to_lowercase());
+    let (mut s, mut r) = keywords::check(&combined_host_path);
+    if !query.is_empty() {
+        let (qs, qr) = keywords::check_query(&query);
+        s = s.saturating_add(qs);
+        r.extend(qr);
+    }
     score = score.saturating_add(s);
     reasons.extend(r);
 
@@ -101,7 +116,7 @@ mod tests {
     use crate::types::Verdict;
 
     fn setup_brand_rules() {
-        std::env::set_var("GARUDA_BRANDS_PATH", "../../lists/brands.json");
+        std::env::set_var("GARUDA_BRANDS_PATH", "../../lists/brands.txt");
     }
 
     #[test]
@@ -381,5 +396,26 @@ mod tests {
         let (score, reasons) = analyse("https://раураі.сом");
         assert!(reasons.iter().any(|r| r == "brand_impersonation:paypal"), "got reasons: {:?}", reasons);
         assert!(score >= 50, "got score: {}", score);
+    }
+
+    #[test]
+    fn brand_owned_gtld_and_oauth_callback_is_clean() {
+        setup_brand_rules();
+        let (score, reasons) = analyse("https://antigravity.google/oauth-callback?state=-QzJVmFdo35rSVuWi6Qccg&iss=https%3A%2F%2Faccounts.google.com&scope=email+profile");
+        let verdict = score_to_verdict(score, reasons);
+        assert!(matches!(verdict.verdict, Verdict::Clean), "Expected Clean verdict, got {:?}", verdict.verdict);
+        assert_eq!(score, 0);
+    }
+
+    #[test]
+    fn static_blocklist_prevents_scams() {
+        setup_brand_rules();
+        let (score, reasons) = analyse("https://autosegurancabrasil.com/login");
+        assert_eq!(score, 100);
+        assert!(reasons.iter().any(|r| r == "malicious_blocklist_match"));
+        
+        let (score, reasons) = analyse("https://sub.airtyrant.com/verify");
+        assert_eq!(score, 100);
+        assert!(reasons.iter().any(|r| r == "malicious_blocklist_match"));
     }
 }

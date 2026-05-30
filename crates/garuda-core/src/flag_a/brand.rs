@@ -12,9 +12,13 @@ pub fn check(url: &str) -> BrandCheckResult {
     let mut matches = url::find_brand_matches(&parts.host);
     let mut is_path_match = false;
 
-    // If no host matches found, check the path/query for brand names
-    if matches.is_empty() && !parts.path_and_query.is_empty() {
-        let tokens = url::tokenize_for_keywords(&parts.path_and_query);
+    // If no host matches found, check the path (excluding query) for brand names
+    let path = match parts.path_and_query.split_once('?') {
+        Some((p, _)) => p,
+        None => &parts.path_and_query,
+    };
+    if matches.is_empty() && !path.is_empty() {
+        let tokens = url::tokenize_for_keywords(path);
         let rules = brand_rules::get_rules();
         for rule in rules.rules.iter() {
             if url::is_domain_or_subdomain(&parts.host, &rule.domain) {

@@ -1,0 +1,267 @@
+
+════════════════════════════════════════════════════════
+ GarudaVision Test Suite — Batch 3 (TC-101 to TC-150)
+════════════════════════════════════════════════════════
+
+[CAT-19] Modern Auth Providers — Expected: CLEAN
+
+URL     : https://auth.company.workos.com/authorize
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.company.workos.com"]
+URL     : https://clerk.dev/sign-in
+Score   : 0
+Verdict : Clean
+Reasons : []
+URL     : https://login.example.descope.com/oauth2/authorize
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:login.example.descope.com"]
+URL     : https://id.example.zitadel.cloud/oauth/v2/authorize
+Score   : 0
+Verdict : Clean
+Reasons : []
+URL     : https://auth.example.com/realms/master/protocol/openid-connect/auth
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://try.ory.sh/oauth2/auth
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:try.ory.sh"]
+URL     : https://auth.supertokens.com/auth
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.supertokens.com"]
+URL     : https://fusionauth.io/oauth2/authorize
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:fusionauth.io"]
+URL     : https://auth0.com/authorize
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth0.com"]
+URL     : https://accounts.pingidentity.com/as/authorization.oauth2
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:accounts.pingidentity.com"]
+
+[CAT-20] OAuth Redirect Abuse — Expected: BLOCK / CAUTION
+
+URL     : https://accounts.google.com/o/oauth2/auth?redirect_uri=https://evil-login.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:accounts.google.com"]
+URL     : https://github.com/login/oauth/authorize?redirect_uri=https://paypal-reset.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:github.com"]
+URL     : https://auth.example.com/login?next=https://evil.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?return=https://evil.com/login
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?redirect=https://wallet-drain.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?next=https%3A%2F%2Fevil.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?next=https%253A%252F%252Fevil.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?continue=https://phishing.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?url=https://credential-harvest.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?dest=https://aadhaar-update.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+
+[CAT-21] Hosting Platform Abuse — Expected: BLOCK
+
+URL     : https://paypal-auth.netlify.app
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_hosting:netlify.app", "suspicious_keyword:auth"]
+URL     : https://secure-login.firebaseapp.com
+Score   : 100
+Verdict : Block
+Reasons : ["suspicious_hosting:firebaseapp.com", "suspicious_keyword:login", "suspicious_keyword:secure"]
+URL     : https://aadhaar-update.web.app
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:aadhaar", "suspicious_hosting:web.app", "suspicious_keyword:aadhaar", "suspicious_keyword:update"]
+URL     : https://sbi-auth.fly.dev
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:sbi", "suspicious_hosting:fly.dev", "suspicious_keyword:auth"]
+URL     : https://microsoft365-login.replit.app
+Score   : 62
+Verdict : Caution
+Reasons : ["suspicious_keyword:login", "homoglyph_detected"]
+URL     : https://coinbase-wallet.pages.dev
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:coinbase", "suspicious_hosting:pages.dev", "suspicious_keyword:wallet"]
+URL     : https://okta-login.surge.sh
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:okta", "suspicious_keyword:login"]
+URL     : https://upi-verification.glitch.me
+Score   : 67
+Verdict : Caution
+Reasons : ["suspicious_hosting:glitch.me", "suspicious_keyword:verification"]
+URL     : https://aws-auth.koyeb.app
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:aws", "suspicious_keyword:auth"]
+URL     : https://verify-wallet.deno.dev
+Score   : 70
+Verdict : Caution
+Reasons : ["suspicious_keyword:wallet", "suspicious_keyword:verify"]
+
+[CAT-22] SAML / Enterprise SSO — Expected: CLEAN
+
+URL     : https://login.microsoftonline.com/common/saml2
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:login.microsoftonline.com"]
+URL     : https://sts.windows.net/tenant-id/
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:sts.windows.net"]
+URL     : https://sso.jumpcloud.com/saml2/google
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:sso.jumpcloud.com"]
+URL     : https://company.okta.com/app/google/sso/saml
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:company.okta.com"]
+URL     : https://idp.company.com/saml/login
+Score   : 31
+Verdict : Suspicious
+Reasons : ["suspicious_keyword:login"]
+URL     : https://accounts.google.com/o/saml2/idp
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:accounts.google.com"]
+URL     : https://auth.company.com/adfs/ls
+Score   : 28
+Verdict : Suspicious
+Reasons : ["suspicious_keyword:auth"]
+URL     : https://login.salesforce.com/idp/login
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:login.salesforce.com"]
+URL     : https://sso.company.com/auth/realms/main/protocol/saml
+Score   : 28
+Verdict : Suspicious
+Reasons : ["suspicious_keyword:auth"]
+URL     : https://login.cisco.com/saml
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:login.cisco.com"]
+
+[CAT-23] CDN / Attachment Abuse — Expected: BLOCK / CAUTION
+
+URL     : https://cdn.discordapp.com/attachments/12345/99999/login.html
+Score   : 22
+Verdict : Clean
+Reasons : ["suspicious_keyword:login"]
+URL     : https://cdn.discordapp.com/attachments/12345/99999/paypal_verify.html
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:verify"]
+URL     : https://raw.githubusercontent.com/test/repo/main/login.html
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:raw.githubusercontent.com"]
+URL     : https://user.github.io/paypal-login
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_hosting:github.io", "suspicious_keyword:login"]
+URL     : https://storage.googleapis.com/secure-login/index.html
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:storage.googleapis.com"]
+URL     : https://pages.dev/paypal-update
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_hosting:pages.dev", "suspicious_keyword:update"]
+URL     : https://raw.githubusercontent.com/test/repo/main/aadhaar-update.html
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:raw.githubusercontent.com"]
+URL     : https://objects.githubusercontent.com/login-verification.html
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:objects.githubusercontent.com"]
+URL     : https://firebase.google.com/downloads/login.html
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:firebase.google.com"]
+URL     : https://cdn.jsdelivr.net/gh/test/repo/login.html
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:cdn.jsdelivr.net"]
+
+[CAT-24] URL Parser Edge Cases — Expected: BLOCK
+
+URL     : https://paypal.com..evil.com/login
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:login"]
+URL     : https://paypal.com./signin
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:paypal.com"]
+URL     : https://paypal-login.com#@evil.com
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:login"]
+URL     : https://%70aypal.com/login
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:paypal.com"]
+URL     : https://xn--80ak6aa92e.com/login
+Score   : 62
+Verdict : Caution
+Reasons : ["suspicious_keyword:login", "homoglyph_detected"]
+URL     : https://paypal.com%2F%2Fevil.com/login
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:paypal.com"]
+URL     : https://paypal.com%252F%252Fevil.com/login
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:login", "homoglyph_detected"]
+URL     : https://login.paypal.com.evil.com
+Score   : 100
+Verdict : Block
+Reasons : ["many_subdomains:3", "brand_impersonation:paypal", "suspicious_keyword:login"]
+URL     : https://secure-paypal.evil.com
+Score   : 99
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:secure"]
+URL     : https://evil.com/paypal.com/signin
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:signin"]
+
+════════════════════════════════════════════════════════
+ Batch 3 Complete — TC-101 to TC-150
+ Full Suite: 150 / 150
+════════════════════════════════════════════════════════

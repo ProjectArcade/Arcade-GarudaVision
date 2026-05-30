@@ -2,7 +2,7 @@ use garuda_core::{flag_a, scorer};
 use garuda_core::types::Verdict;
 
 fn setup_brand_rules() {
-    std::env::set_var("GARUDA_BRANDS_PATH", "../../lists/brands.json");
+    std::env::set_var("GARUDA_BRANDS_PATH", "../../lists/brands.txt");
 }
 
 struct TestCase {

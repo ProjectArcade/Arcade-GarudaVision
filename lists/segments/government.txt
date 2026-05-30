@@ -1,0 +1,350 @@
+# COUNTRY-WISE IMPORTANT GOVERNMENT SITES (Updated: May 2026)
+# Format: domain  |  Department / Purpose
+# ════════════════════════════════════════════════════════════════════════════
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇮🇳  INDIA
+## ══════════════════════════════════════════════════════════════════════════
+
+### National Portals
+india.gov.in                    # National Portal of India
+mygov.in                        # Citizen engagement platform
+digitalindia.gov.in             # Digital India programme
+makeinindia.com                 # Make in India initiative
+pmindia.gov.in                  # Prime Minister's Office
+presidentofindia.gov.in         # President of India
+
+### Identity & Documentation
+uidai.gov.in                    # Aadhaar / UIDAI
+digilocker.gov.in               # Digital document locker
+passportindia.gov.in            # Passport Seva
+
+### Tax & Finance
+incometax.gov.in                # Income Tax e-filing
+gst.gov.in                      # GST portal
+rbi.org.in                      # Reserve Bank of India
+sebi.gov.in                     # Securities & Exchange Board of India
+npci.org.in                     # National Payments Corporation (UPI/IMPS)
+nsdl.co.in                      # National Securities Depository
+cdslindia.com                   # Central Depository Services
+
+### Social Security & Labour
+epfindia.gov.in                 # Employees' Provident Fund
+esic.gov.in                     # Employee State Insurance
+nps.nsdl.com                    # National Pension System
+pmjay.gov.in                    # Ayushman Bharat health scheme
+
+### Transport & Travel
+irctc.co.in                     # Indian Railway ticket booking
+indianrailways.gov.in           # Indian Railways official
+parivahan.gov.in                # Vehicle registration / driving licence
+dgca.gov.in                     # Directorate General of Civil Aviation
+
+### Health
+mohfw.gov.in                    # Ministry of Health
+cowin.gov.in                    # COVID-19 vaccination (legacy)
+nhp.gov.in                      # National Health Portal
+icmr.gov.in                     # Indian Council of Medical Research
+
+### Education
+education.gov.in                # Ministry of Education
+ugc.ac.in                       # University Grants Commission
+nta.ac.in                       # National Testing Agency (JEE/NEET)
+aicte-india.org                 # AICTE technical education
+
+### Services & Utilities
+umang.gov.in                    # Unified Mobile App for Gov services
+mca.gov.in                      # Ministry of Corporate Affairs
+nsws.gov.in                     # National Single Window System
+cersai.org.in                   # Central Registry (mortgages)
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇺🇸  UNITED STATES
+## ══════════════════════════════════════════════════════════════════════════
+usa.gov                         # Official US government portal
+whitehouse.gov                  # White House
+congress.gov                    # US Congress / legislation
+supremecourt.gov                # US Supreme Court
+irs.gov                         # Internal Revenue Service (tax)
+ssa.gov                         # Social Security Administration
+medicare.gov                    # Medicare health insurance
+healthcare.gov                  # Health insurance marketplace (ACA)
+state.gov                       # Department of State / passports
+dhs.gov                         # Homeland Security
+fbi.gov                         # Federal Bureau of Investigation
+sec.gov                         # Securities & Exchange Commission
+federalreserve.gov              # Federal Reserve
+cdc.gov                         # Centers for Disease Control
+fda.gov                         # Food & Drug Administration
+nasa.gov                        # NASA
+usps.com                        # US Postal Service
+uscis.gov                       # US Citizenship & Immigration
+tsa.gov                         # Transportation Security Administration
+data.gov                        # Open government data
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇬🇧  UNITED KINGDOM
+## ══════════════════════════════════════════════════════════════════════════
+gov.uk                          # Main UK government portal
+parliament.uk                   # UK Parliament
+royalhousehold.org.uk           # Royal Family
+hmrc.gov.uk                     # HM Revenue & Customs (tax)
+nhs.uk                          # National Health Service
+dvla.gov.uk                     # Driver & Vehicle Licensing Agency
+gov.uk/apply-passport           # Passport applications (via gov.uk)
+bankofengland.co.uk             # Bank of England
+fca.org.uk                      # Financial Conduct Authority
+companieshouse.gov.uk           # Companies House (business reg.)
+ofcom.org.uk                    # Communications regulator
+judiciary.gov.uk                # Courts & Tribunals
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇪🇺  EUROPEAN UNION
+## ══════════════════════════════════════════════════════════════════════════
+europa.eu                       # European Union official portal
+ec.europa.eu                    # European Commission
+europarl.europa.eu              # European Parliament
+ecb.europa.eu                   # European Central Bank
+eeas.europa.eu                  # EU External Action / Diplomacy
+eur-lex.europa.eu               # EU law & legislation
+eurostat.ec.europa.eu           # EU statistics
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇩🇪  GERMANY
+## ══════════════════════════════════════════════════════════════════════════
+bundesregierung.de              # Federal Government
+bundestag.de                    # German Parliament
+bundesverfassungsgericht.de     # Federal Constitutional Court
+bundesfinanzministerium.de      # Federal Finance Ministry
+elster.de                       # Tax filing portal (Finanzamt)
+bundesgesundheitsministerium.de # Federal Health Ministry
+bundesbank.de                   # Deutsche Bundesbank
+bafin.de                        # Federal Financial Supervisory Authority
+destatis.de                     # Federal Statistics Office
+arbeitsagentur.de               # Federal Employment Agency
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇫🇷  FRANCE
+## ══════════════════════════════════════════════════════════════════════════
+gouvernement.fr                 # French Government portal
+elysee.fr                       # President of France
+assemblee-nationale.fr          # National Assembly
+senat.fr                        # French Senate
+impots.gouv.fr                  # Tax authority (DGFiP)
+ameli.fr                        # Health insurance (Assurance Maladie)
+service-public.fr               # Public services portal
+banque-france.fr                # Banque de France
+amf-france.org                  # Financial Markets Authority
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇯🇵  JAPAN
+## ══════════════════════════════════════════════════════════════════════════
+japan.go.jp                     # Japanese Government portal (EN)
+kantei.go.jp                    # Prime Minister's Office
+sangiin.go.jp                   # House of Councillors (Upper)
+shugiin.go.jp                   # House of Representatives (Lower)
+nta.go.jp                       # National Tax Agency
+mhlw.go.jp                      # Health, Labour & Welfare
+mofa.go.jp                      # Ministry of Foreign Affairs
+mof.go.jp                       # Ministry of Finance
+boj.or.jp                       # Bank of Japan
+fsa.go.jp                       # Financial Services Agency
+mlit.go.jp                      # Land, Infrastructure, Transport & Tourism
+digital.go.jp                   # Digital Agency (マイナンバー)
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇨🇳  CHINA
+## ══════════════════════════════════════════════════════════════════════════
+gov.cn                          # Central People's Government portal
+npc.gov.cn                      # National People's Congress
+pbc.gov.cn                      # People's Bank of China
+csrc.gov.cn                     # China Securities Regulatory Commission
+customs.gov.cn                  # General Administration of Customs
+mfa.gov.cn / fmprc.gov.cn       # Ministry of Foreign Affairs
+nhc.gov.cn                      # National Health Commission
+moe.gov.cn                      # Ministry of Education
+stats.gov.cn                    # National Bureau of Statistics
+samr.gov.cn                     # Market Regulation (business reg.)
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇦🇺  AUSTRALIA
+## ══════════════════════════════════════════════════════════════════════════
+australia.gov.au                # Main government portal
+aph.gov.au                      # Australian Parliament
+ato.gov.au                      # Australian Taxation Office
+servicesaustralia.gov.au        # Social services (Medicare/Centrelink)
+homeaffairs.gov.au              # Immigration & citizenship
+dfat.gov.au                     # Dept of Foreign Affairs & Trade
+rba.gov.au                      # Reserve Bank of Australia
+asic.gov.au                     # Securities & Investments Commission
+accc.gov.au                     # Competition & Consumer Commission
+myhealth.gov.au                 # My Health Record
+abr.gov.au                      # Australian Business Register
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇨🇦  CANADA
+## ══════════════════════════════════════════════════════════════════════════
+canada.ca                       # Main Government of Canada portal
+parl.ca                         # Parliament of Canada
+cra-arc.gc.ca                   # Canada Revenue Agency (tax)
+canada.ca/en/immigration        # Immigration, Refugees & Citizenship
+canada.ca/en/passport           # Passport application
+servicecanada.gc.ca             # Service Canada (EI, CPP, OAS)
+bankofcanada.ca                 # Bank of Canada
+osfi-bsif.gc.ca                 # Financial institutions regulator
+canada.ca/en/health-canada      # Health Canada
+statcan.gc.ca                   # Statistics Canada
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇸🇬  SINGAPORE
+## ══════════════════════════════════════════════════════════════════════════
+gov.sg                          # Singapore Government portal
+singpass.gov.sg                 # National digital identity (like Aadhaar)
+iras.gov.sg                     # Inland Revenue Authority (tax)
+mom.gov.sg                      # Ministry of Manpower
+moh.gov.sg                      # Ministry of Health
+mas.gov.sg                      # Monetary Authority of Singapore
+ica.gov.sg                      # Immigration & Checkpoints Authority
+cpf.gov.sg                      # Central Provident Fund
+acra.gov.sg                     # Business registration
+data.gov.sg                     # Open data portal
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇦🇪  UAE (United Arab Emirates)
+## ══════════════════════════════════════════════════════════════════════════
+government.ae                   # UAE Government portal
+uaecabinet.ae                   # UAE Cabinet
+mof.gov.ae                      # Ministry of Finance
+mohre.gov.ae                    # Ministry of Human Resources
+doi.gov.ae / tamm.abudhabi.ae   # Abu Dhabi government services
+dubai.ae                        # Dubai government portal
+gdrfa.gov.ae                    # General Directorate of Residency (visa)
+adha.gov.ae                     # Abu Dhabi Health Authority
+cbuae.gov.ae                    # Central Bank of UAE
+sca.gov.ae                      # Securities & Commodities Authority
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇧🇷  BRAZIL
+## ══════════════════════════════════════════════════════════════════════════
+gov.br                          # Brazilian Government portal
+planalto.gov.br                 # President / Executive
+camara.leg.br                   # Chamber of Deputies
+senado.leg.br                   # Senate
+rfb.gov.br                      # Receita Federal (tax)
+bcb.gov.br                      # Banco Central do Brasil
+cvm.gov.br                      # Securities Commission
+mec.gov.br                      # Ministry of Education
+sus.gov.br                      # Sistema Único de Saúde (health)
+ibge.gov.br                     # Statistics bureau
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇷🇺  RUSSIA
+## ══════════════════════════════════════════════════════════════════════════
+gov.ru                          # Russian Government portal
+kremlin.ru                      # President of Russia
+duma.gov.ru                     # State Duma (Parliament)
+nalog.gov.ru                    # Federal Tax Service
+cbr.ru                          # Central Bank of Russia
+mos.ru                          # Moscow City Government
+gosuslugi.ru                    # Government services portal (key!)
+pfr.gov.ru                      # Pension Fund of Russia
+minzdrav.gov.ru                 # Ministry of Health
+minobrnauki.gov.ru              # Ministry of Education & Science
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇿🇦  SOUTH AFRICA
+## ══════════════════════════════════════════════════════════════════════════
+gov.za                          # South African Government
+parliament.gov.za               # Parliament
+sars.gov.za                     # South African Revenue Service (tax)
+sarb.co.za                      # SA Reserve Bank
+dha.gov.za                      # Home Affairs (ID / passport)
+health.gov.za                   # Department of Health
+statssa.gov.za                  # Stats South Africa
+labour.gov.za                   # Department of Labour
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇰🇷  SOUTH KOREA
+## ══════════════════════════════════════════════════════════════════════════
+korea.go.kr                     # Korean Government portal (EN)
+president.go.kr                 # President of South Korea
+assembly.go.kr                  # National Assembly
+nts.go.kr                       # National Tax Service
+bok.or.kr                       # Bank of Korea
+fsc.go.kr                       # Financial Services Commission
+mohw.go.kr                      # Ministry of Health & Welfare
+mofa.go.kr                      # Ministry of Foreign Affairs
+immigration.go.kr               # Korea Immigration Service
+moe.go.kr                       # Ministry of Education
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇮🇩  INDONESIA
+## ══════════════════════════════════════════════════════════════════════════
+indonesia.go.id                 # Indonesian Government portal
+setneg.go.id                    # Presidential Secretariat
+dpr.go.id                       # House of Representatives
+pajak.go.id                     # Tax authority (DJP)
+bi.go.id                        # Bank Indonesia
+ojk.go.id                       # Financial Services Authority
+bpjs-kesehatan.go.id            # National health insurance (JKN)
+kemlu.go.id                     # Ministry of Foreign Affairs
+imigrasi.go.id                  # Immigration
+kemendikbud.go.id               # Education Ministry
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇵🇰  PAKISTAN
+## ══════════════════════════════════════════════════════════════════════════
+pakistan.gov.pk                 # Government of Pakistan portal
+na.gov.pk                       # National Assembly
+sbp.org.pk                      # State Bank of Pakistan
+fbr.gov.pk                      # Federal Board of Revenue (tax)
+nadra.gov.pk                    # National ID authority (CNIC)
+mofa.gov.pk                     # Ministry of Foreign Affairs
+secp.gov.pk                     # Securities & Exchange Commission
+nhsrc.gov.pk                    # National Health Services
+hec.gov.pk                      # Higher Education Commission
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇧🇩  BANGLADESH
+## ══════════════════════════════════════════════════════════════════════════
+bangladesh.gov.bd               # Bangladesh National Portal
+parliament.gov.bd               # Jatiya Sangsad (Parliament)
+nbr.gov.bd                      # National Board of Revenue (tax)
+bb.org.bd                       # Bangladesh Bank
+nidw.gov.bd                     # National ID / Election Commission
+mofa.gov.bd                     # Ministry of Foreign Affairs
+dghs.gov.bd                     # Directorate General of Health
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🇳🇬  NIGERIA
+## ══════════════════════════════════════════════════════════════════════════
+nigeria.gov.ng                  # Federal Government of Nigeria portal
+nassnig.org                     # National Assembly
+firs.gov.ng                     # Federal Inland Revenue Service (tax)
+cbn.gov.ng                      # Central Bank of Nigeria
+nimc.gov.ng                     # National ID Management Commission
+immigrationng.gov.ng            # Nigeria Immigration Service
+sec.gov.ng                      # Securities & Exchange Commission
+nhia.gov.ng                     # National Health Insurance Authority
+
+## ══════════════════════════════════════════════════════════════════════════
+## 🌐  INTERNATIONAL / MULTILATERAL ORGANIZATIONS
+## ══════════════════════════════════════════════════════════════════════════
+un.org                          # United Nations
+who.int                         # World Health Organization
+worldbank.org                   # World Bank
+imf.org                         # International Monetary Fund
+wto.org                         # World Trade Organization
+interpol.int                    # International Criminal Police Org
+iaea.org                        # International Atomic Energy Agency
+unhcr.org                       # UN Refugee Agency
+unicef.org                      # UN Children's Fund
+oecd.org                        # OECD – economic data & policy
+
+## ─── NOTES ──────────────────────────────────────────────────────────────
+## Last verified: May 2026
+## Your original 20 India sites: all retained and expanded above
+## Total countries covered: India, USA, UK, EU, Germany, France, Japan,
+##   China, Australia, Canada, Singapore, UAE, Brazil, Russia, South Africa,
+##   South Korea, Indonesia, Pakistan, Bangladesh, Nigeria + International
+## Some URLs may redirect to subdomains on official sites

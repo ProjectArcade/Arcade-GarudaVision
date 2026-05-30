@@ -1,0 +1,241 @@
+
+════════════════════════════════════════════════════════
+ GarudaVision Test Suite — Batch 4 (TC-151 to TC-200)
+════════════════════════════════════════════════════════
+URL     : https://google.com/url?q=https://evil.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:google.com"]
+URL     : https://google.com/url?q=https://paypal-login.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:google.com"]
+URL     : https://youtube.com/redirect?q=https://wallet-drainer.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:youtube.com"]
+URL     : https://github.com/login/oauth/authorize?redirect_uri=https://evil.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:github.com"]
+URL     : https://accounts.google.com/o/oauth2/auth?redirect_uri=https://evil.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:accounts.google.com"]
+URL     : https://auth.example.com/login?next=https://evil.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?continue=https://evil.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?url=https://evil.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?target=https://evil.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?dest=https://evil.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?next=https%3A%2F%2Fevil.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?next=https%253A%252F%252Fevil.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?redirect=https%25253A%25252F%25252Fevil.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?return=https%3A%2F%2Fpaypal-reset.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://auth.example.com/login?continue=https%3A%2F%2Fwallet-drainer.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:auth.example.com"]
+URL     : https://paypal.com@evil.com/login
+Score   : 22
+Verdict : Clean
+Reasons : ["suspicious_keyword:login"]
+URL     : https://google.com@evil.com
+Score   : 0
+Verdict : Clean
+Reasons : []
+URL     : https://microsoft.com@evil.com/auth
+Score   : 20
+Verdict : Clean
+Reasons : ["suspicious_keyword:auth"]
+URL     : https://accounts.google.com@phishing.com
+Score   : 0
+Verdict : Clean
+Reasons : []
+URL     : https://github.com@evil.com/login
+Score   : 22
+Verdict : Clean
+Reasons : ["suspicious_keyword:login"]
+URL     : https://cdn.discordapp.com/attachments/123/login.html
+Score   : 22
+Verdict : Clean
+Reasons : ["suspicious_keyword:login"]
+URL     : https://cdn.discordapp.com/attachments/123/paypal_verify.html
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:verify"]
+URL     : https://raw.githubusercontent.com/user/repo/main/login.html
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:raw.githubusercontent.com"]
+URL     : https://raw.githubusercontent.com/user/repo/main/paypal.html
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:raw.githubusercontent.com"]
+URL     : https://storage.googleapis.com/secure-login/index.html
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:storage.googleapis.com"]
+URL     : https://objects.githubusercontent.com/login-verification.html
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:objects.githubusercontent.com"]
+URL     : https://cdn.jsdelivr.net/gh/user/repo/paypal.html
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:cdn.jsdelivr.net"]
+URL     : https://pastebin.com/raw/abcdef
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:pastebin.com"]
+URL     : https://idp.company.com/saml/login
+Score   : 31
+Verdict : Suspicious
+Reasons : ["suspicious_keyword:login"]
+URL     : https://auth.company.com/adfs/ls
+Score   : 28
+Verdict : Suspicious
+Reasons : ["suspicious_keyword:auth"]
+URL     : https://sso.company.com/auth/realms/main/protocol/saml
+Score   : 28
+Verdict : Suspicious
+Reasons : ["suspicious_keyword:auth"]
+URL     : https://sso.company.com/openid-connect/auth
+Score   : 28
+Verdict : Suspicious
+Reasons : ["suspicious_keyword:auth"]
+URL     : https://company.okta.com/app/google/sso/saml
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:company.okta.com"]
+URL     : https://login.microsoftonline.com/common/saml2
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:login.microsoftonline.com"]
+URL     : https://sts.windows.net/tenant-id
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:sts.windows.net"]
+URL     : https://login.salesforce.com/idp/login
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:login.salesforce.com"]
+URL     : https://paypal.com..evil.com
+Score   : 85
+Verdict : Block
+Reasons : ["brand_impersonation:paypal"]
+URL     : https://login.paypal.com.evil.com
+Score   : 100
+Verdict : Block
+Reasons : ["many_subdomains:3", "brand_impersonation:paypal", "suspicious_keyword:login"]
+URL     : https://secure-paypal.evil.com
+Score   : 99
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:secure"]
+URL     : https://paypal.com%00.evil.com
+Score   : 85
+Verdict : Block
+Reasons : ["brand_impersonation:paypal"]
+URL     : https://paypal.com%2F%2Fevil.com
+Score   : 0
+Verdict : Clean
+Reasons : ["safe_domain:paypal.com"]
+URL     : https://paypal.com%252F%252Fevil.com
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "homoglyph_detected"]
+URL     : https://paypal-login.com#@evil.com
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:login"]
+URL     : https://evil.com/paypal.com/login
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:login"]
+URL     : https://paypal-login.vercel.app
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_hosting:vercel.app", "suspicious_keyword:login"]
+URL     : https://paypal-login.replit.app
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:login"]
+URL     : https://paypal-login.netlify.app
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_hosting:netlify.app", "suspicious_keyword:login"]
+URL     : https://paypal-login.fly.dev
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_hosting:fly.dev", "suspicious_keyword:login"]
+URL     : https://paypal-login.firebaseapp.com
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_hosting:firebaseapp.com", "suspicious_keyword:login"]
+URL     : https://paypal-login.web.app
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_hosting:web.app", "suspicious_keyword:login"]
+URL     : https://paypal-login.pages.dev
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_hosting:pages.dev", "suspicious_keyword:login"]
+URL     : https://paypal-login.glitch.me
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_hosting:glitch.me", "suspicious_keyword:login"]
+URL     : https://paypal-login.deno.dev
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:paypal", "suspicious_keyword:login"]
+URL     : https://npci-upi-verify.in
+Score   : 31
+Verdict : Suspicious
+Reasons : ["suspicious_keyword:verify"]
+URL     : https://upi-kyc-update.in
+Score   : 42
+Verdict : Suspicious
+Reasons : ["suspicious_keyword:kyc", "suspicious_keyword:update"]
+URL     : https://aadhaar-otp-update.in
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:aadhaar", "suspicious_keyword:otp", "suspicious_keyword:aadhaar", "suspicious_keyword:update"]
+URL     : https://digilocker-document-verify.in
+Score   : 100
+Verdict : Block
+Reasons : ["brand_impersonation:digilocker", "suspicious_keyword:verify"]
+URL     : https://irctc-ticket-verify.in
+Score   : 22
+Verdict : Clean
+Reasons : ["suspicious_keyword:verify"]
+
+════════════════════════════════════════════════════════
+ Batch 4 Complete — TC-151 to TC-200
+ Full Suite: 200 / 200
+════════════════════════════════════════════════════════

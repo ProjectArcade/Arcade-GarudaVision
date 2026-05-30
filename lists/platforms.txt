@@ -1,11 +1,25 @@
-vercel.app
-netlify.app
-github.io
-pages.dev
-glitch.me
-replit.dev
-render.com
-fly.dev
-firebaseapp.com
-web.app
-appspot.com
+# FREE HOSTING & CLOUD PLATFORMS (Updated: May 2026)
+# Format: domain  |  Purpose
+# ════════════════════════════════════════════════════════════════════════════
+
+## ══════════════════════════════════════════════════════════════════════════
+## ☁️  FREE PLATFORMS
+## ══════════════════════════════════════════════════════════════════════════
+appspot.com                     # Google App Engine
+firebaseapp.com                 # Google Firebase App Hosting (Legacy)
+fly.dev                         # Fly.io hosting platform
+github.io                       # GitHub Pages
+githubusercontent.com           # Raw GitHub content delivery
+glitch.me                       # Glitch app hosting
+herokuapp.com                   # Heroku app hosting
+netlify.app                     # Netlify hosting platform
+pages.dev                       # Cloudflare Pages
+render.com                      # Render cloud hosting
+replit.dev                      # Replit sandbox hosting
+s3.amazonaws.com                # Amazon S3 object storage
+storage.googleapis.com          # Google Cloud Storage
+supabase.co                     # Supabase backend platform
+surge.sh                        # Surge static web publishing
+vercel.app                      # Vercel hosting platform
+web.app                         # Google Firebase hosting
+workers.dev                     # Cloudflare Workers
