@@ -3,6 +3,15 @@ use garuda_lists::{platform_list, safe_list};
 use std::collections::HashSet;
 use unicode_normalization::UnicodeNormalization;
 
+/// Dangerous URI schemes that should be immediately blocked.
+const DANGEROUS_SCHEMES: &[&str] = &[
+    "javascript:",
+    "data:",
+    "blob:",
+    "vbscript:",
+    "ftp:",
+];
+
 #[derive(Debug, Clone)]
 pub enum MatchType {
     Exact,
@@ -26,13 +35,43 @@ pub struct BrandMatch {
 pub struct UrlParts {
     pub original: String,
     pub normalized: String,
+    pub scheme: String,
     pub host: String,
     pub path_and_query: String,
 }
 
+/// Returns true if the URL uses a dangerous scheme (data:, javascript:, blob:, etc.)
+pub fn is_dangerous_scheme(url: &str) -> bool {
+    let lower = url.trim().to_lowercase();
+    DANGEROUS_SCHEMES.iter().any(|s| lower.starts_with(s))
+}
+
 pub fn parse_url(input: &str) -> UrlParts {
     let original = input.trim().to_string();
-    let normalized = original.nfkc().collect::<String>().to_lowercase();
+    
+    // Strip internal tab and newline characters that browsers ignore
+    let stripped: String = original
+        .chars()
+        .filter(|&c| c != '\t' && c != '\r' && c != '\n')
+        .collect();
+
+    // Percent-decode before normalization so %XX-encoded characters are resolved
+    let decoded = percent_decode(&stripped);
+    
+    // Normalize backslashes to forward slashes in pre-query/pre-fragment parts (mimicking WHATWG browser normalizations)
+    let slashes_normalized = normalize_slashes(&decoded);
+    
+    let normalized = slashes_normalized.nfkc().collect::<String>().to_lowercase();
+
+    // Extract scheme
+    let scheme = if let Some(idx) = normalized.find("://") {
+        normalized[..idx].to_string()
+    } else if let Some(idx) = normalized.find(':') {
+        normalized[..idx].to_string()
+    } else {
+        String::new()
+    };
+
     let without_scheme = normalized
         .strip_prefix("https://")
         .or_else(|| normalized.strip_prefix("http://"))
@@ -62,8 +101,62 @@ pub fn parse_url(input: &str) -> UrlParts {
     UrlParts {
         original,
         normalized,
+        scheme,
         host,
         path_and_query,
+    }
+}
+
+/// Decode percent-encoded characters (%XX) in a URL string.
+fn percent_decode(input: &str) -> String {
+    let bytes = input.as_bytes();
+    let mut out = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 2 < bytes.len() {
+            if let (Some(hi), Some(lo)) = (
+                hex_val(bytes[i + 1]),
+                hex_val(bytes[i + 2]),
+            ) {
+                out.push(hi << 4 | lo);
+                i += 3;
+                continue;
+            }
+        }
+        out.push(bytes[i]);
+        i += 1;
+    }
+    String::from_utf8(out).unwrap_or_else(|_| input.to_string())
+}
+
+/// Helper to normalize backslashes to forward slashes in pre-query/pre-fragment parts of the URL.
+fn normalize_slashes(url: &str) -> String {
+    let mut parts = url.splitn(2, |c| c == '?' || c == '#');
+    let pre_query = parts.next().unwrap_or("");
+    let rest = parts.next();
+    
+    let pre_query_normalized = pre_query.replace('\\', "/");
+    
+    if let Some(r) = rest {
+        let delimiter = if url.contains('?') && url.contains('#') {
+            if url.find('?').unwrap() < url.find('#').unwrap() { '?' } else { '#' }
+        } else if url.contains('?') {
+            '?'
+        } else {
+            '#'
+        };
+        format!("{}{}{}", pre_query_normalized, delimiter, r)
+    } else {
+        pre_query_normalized
+    }
+}
+
+fn hex_val(byte: u8) -> Option<u8> {
+    match byte {
+        b'0'..=b'9' => Some(byte - b'0'),
+        b'a'..=b'f' => Some(byte - b'a' + 10),
+        b'A'..=b'F' => Some(byte - b'A' + 10),
+        _ => None,
     }
 }
 
@@ -168,7 +261,7 @@ fn match_rule_tokens(host: &str, tokens: &[String], rule: &BrandRule) -> Option<
         if token.len() >= 5 {
             let token_norm = normalize_token(token);
             if let Some(distance) = strict_levenshtein_match(&token_norm, &canonical_norm) {
-                let confidence = if distance == 1 { 0.82 } else { 0.75 };
+                let confidence = if distance == 1 { 0.82 } else { 0.80 };
                 return Some(build_match(rule, MatchType::TypoDistance, confidence));
             }
         }
@@ -197,7 +290,7 @@ fn tokenize_host(host: &str) -> Vec<String> {
 
 pub fn tokenize_for_keywords(value: &str) -> Vec<String> {
     value
-        .split(|ch: char| !ch.is_ascii_alphanumeric())
+        .split(|ch: char| !ch.is_alphanumeric())
         .filter(|token| !token.is_empty())
         .flat_map(|token| split_compound_token(token))
         .collect()
@@ -206,14 +299,14 @@ pub fn tokenize_for_keywords(value: &str) -> Vec<String> {
 fn normalize_token(token: &str) -> String {
     token
         .chars()
-        .filter(|ch| ch.is_ascii_alphanumeric())
+        .filter(|ch| ch.is_alphanumeric())
         .collect::<String>()
         .to_lowercase()
 }
 
 fn split_compound_token(token: &str) -> Vec<String> {
     let normalized = normalize_token(token);
-    if normalized.len() < 8 {
+    if !normalized.is_ascii() || normalized.len() < 8 {
         return vec![normalized];
     }
 
@@ -512,6 +605,23 @@ pub fn normalize_homoglyphs_with_flags(value: &str) -> (String, bool) {
             'T' | '7' => 't',
             'E' | '3' => 'e',
             '@' => 'a',
+            // Cyrillic Lookalikes
+            'а' | 'А' | 'α' | 'Α' => 'a',
+            'е' | 'Е' | 'ε' | 'Ε' => 'e',
+            'о' | 'О' | 'ο' | 'Ο' => 'o',
+            'р' | 'Р' | 'ρ' | 'Ρ' => 'p',
+            'с' | 'С' => 'c',
+            'у' | 'У' | 'υ' | 'Υ' => 'y',
+            'х' | 'Х' | 'χ' | 'Χ' => 'x',
+            'і' | 'І' | 'ι' | 'Ι' => 'l',
+            'ѕ' | 'Ѕ' => 's',
+            'ј' | 'Ј' => 'j',
+            'н' | 'Н' | 'η' | 'Η' => 'h',
+            'м' | 'М' | 'μ' | 'Μ' => 'm',
+            'к' | 'К' | 'κ' | 'Κ' => 'k',
+            'т' | 'Т' | 'τ' | 'Τ' => 't',
+            'в' | 'В' | 'ν' | 'Ν' => 'v',
+            'з' | 'З' => 'z',
             other => other,
         };
 

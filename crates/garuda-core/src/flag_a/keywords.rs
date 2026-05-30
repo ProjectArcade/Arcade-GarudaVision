@@ -50,7 +50,7 @@ pub fn check(url: &str) -> (u8, Vec<String>) {
     ];
 
     for (kw, points) in critical_keywords {
-        if (url_lower.contains(kw) || tokens.iter().any(|token| token == kw))
+        if (if kw.len() >= 5 { url_lower.contains(kw) } else { false } || tokens.iter().any(|token| token == kw))
             && !reasons.iter().any(|r| r == &format!("suspicious_keyword:{}", kw))
         {
             score = score.saturating_add(*points);
@@ -58,25 +58,21 @@ pub fn check(url: &str) -> (u8, Vec<String>) {
         }
     }
 
-    if score < 20 {
-        for (kw, points) in high_keywords {
-            if (url_lower.contains(kw) || tokens.iter().any(|token| token == kw))
-                && !reasons.iter().any(|r| r == &format!("suspicious_keyword:{}", kw))
-            {
-                score = score.saturating_add(*points);
-                reasons.push(format!("suspicious_keyword:{}", kw));
-            }
+    for (kw, points) in high_keywords {
+        if (if kw.len() >= 5 { url_lower.contains(kw) } else { false } || tokens.iter().any(|token| token == kw))
+            && !reasons.iter().any(|r| r == &format!("suspicious_keyword:{}", kw))
+        {
+            score = score.saturating_add(*points);
+            reasons.push(format!("suspicious_keyword:{}", kw));
         }
     }
 
-    if score < 30 {
-        for (kw, points) in medium_keywords {
-            if (url_lower.contains(kw) || tokens.iter().any(|token| token == kw))
-                && !reasons.iter().any(|r| r == &format!("suspicious_keyword:{}", kw))
-            {
-                score = score.saturating_add(*points);
-                reasons.push(format!("suspicious_keyword:{}", kw));
-            }
+    for (kw, points) in medium_keywords {
+        if (if kw.len() >= 5 { url_lower.contains(kw) } else { false } || tokens.iter().any(|token| token == kw))
+            && !reasons.iter().any(|r| r == &format!("suspicious_keyword:{}", kw))
+        {
+            score = score.saturating_add(*points);
+            reasons.push(format!("suspicious_keyword:{}", kw));
         }
     }
 

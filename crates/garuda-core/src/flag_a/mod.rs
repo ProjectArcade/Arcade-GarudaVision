@@ -10,6 +10,10 @@ fn score_push(score: &mut u8, reasons: &mut Vec<String>, amount: u8, reason: Str
 }
 
 pub fn analyse(url: &str) -> (u8, Vec<String>) {
+    if url::is_dangerous_scheme(url) {
+        return (100, vec!["dangerous_scheme".to_string()]);
+    }
+
     let parts = url::parse_url(url);
     let mut score: u8 = 0;
     let mut reasons = Vec::new();
@@ -47,14 +51,19 @@ pub fn analyse(url: &str) -> (u8, Vec<String>) {
         );
     }
 
+    let mut is_safe = false;
     if url::is_safe_domain(&parts.host) {
-        score = score.saturating_sub(20);
         reasons.push(format!("safe_domain:{}", parts.host));
+        is_safe = true;
     }
 
     if url::is_indian_trusted_domain(&parts.host) {
-        score = score.saturating_sub(10);
         reasons.push(format!("trusted_indian_domain:{}", parts.host));
+        is_safe = true;
+    }
+
+    if is_safe {
+        return (0, reasons);
     }
 
     let brand_result = brand::check(&parts.original);
@@ -70,7 +79,7 @@ pub fn analyse(url: &str) -> (u8, Vec<String>) {
     score = score.saturating_add(s);
     reasons.extend(r);
 
-    let (s, r) = homoglyph::check(&parts.original);
+    let (s, r) = homoglyph::check(&parts.host);
     score = score.saturating_add(s);
     reasons.extend(r);
 
@@ -297,5 +306,80 @@ mod tests {
         setup_brand_rules();
         let (_score, reasons) = analyse("https://outlook.com");
         assert!(reasons.iter().all(|r| r != "brand_impersonation:outlook"));
+    }
+
+    #[test]
+    fn percent_encoded_brand_detected() {
+        setup_brand_rules();
+        let (score, reasons) = analyse("https://pay%70al-verify.com");
+        assert!(reasons.iter().any(|r| r == "brand_impersonation:paypal"), "got reasons: {:?}", reasons);
+        assert!(score >= 45, "got score: {}", score);
+    }
+
+    #[test]
+    fn brand_in_path_detected() {
+        setup_brand_rules();
+        let (score, reasons) = analyse("https://evil123.com/paypal/login");
+        assert!(reasons.iter().any(|r| r == "brand_impersonation:paypal"), "got reasons: {:?}", reasons);
+        assert!(score >= 30, "got score: {}", score); // path matches get 0.7 discount
+    }
+
+    #[test]
+    fn dangerous_uri_scheme_blocked() {
+        setup_brand_rules();
+        let (score, reasons) = analyse("javascript:alert(1)");
+        assert_eq!(score, 100);
+        assert!(reasons.iter().any(|r| r == "dangerous_scheme"));
+    }
+
+    #[test]
+    fn backslash_normalization_bypass_prevented() {
+        setup_brand_rules();
+        // 1. Backslash before brand domain: "https://attacker.com\.google.com"
+        // Without normalization, this thinks it's a subdomain of google.com (safe).
+        // With normalization, it parses host as "attacker.com" and path as "/.google.com".
+        let (_score, reasons) = analyse("https://attacker.com\\.google.com");
+        assert!(
+            reasons.iter().all(|r| !r.contains("safe_domain")),
+            "Expected host to be attacker.com (not safe), got reasons: {:?}",
+            reasons
+        );
+
+        // 2. Backslash and @ in authority: "https://attacker.com\path@google.com"
+        // Without normalization, it splits at @ from the right on the authority "attacker.com\path@google.com" -> host is google.com.
+        // With normalization, it is "https://attacker.com/path@google.com" -> host is attacker.com, path is "/path@google.com".
+        let (_score, reasons) = analyse("https://attacker.com\\path@google.com");
+        assert!(
+            reasons.iter().all(|r| !r.contains("safe_domain")),
+            "Expected host to be attacker.com (not safe), got reasons: {:?}",
+            reasons
+        );
+    }
+
+    #[test]
+    fn double_backslash_normalized() {
+        setup_brand_rules();
+        let (score, reasons) = analyse("https:\\\\google-account-verify.vercel.app\\login");
+        assert!(reasons.iter().any(|r| r.contains("suspicious_hosting:vercel.app")));
+        assert!(score >= 80);
+    }
+
+    #[test]
+    fn internal_whitespace_stripped() {
+        setup_brand_rules();
+        let (score, reasons) = analyse("https://goo\tgle-account-ve\nri\rfy.vercel.app/login");
+        assert!(reasons.iter().any(|r| r.contains("suspicious_hosting:vercel.app")));
+        assert!(score >= 80);
+    }
+
+    #[test]
+    fn whole_script_cyrillic_homoglyph_spoofing_blocked() {
+        setup_brand_rules();
+        // "раураі.сом" using Cyrillic characters p, a, y, p, a, i, c, o, m.
+        // It has no mixed script (only Cyrillic) and no punycode prefix in Unicode form.
+        // Our homoglyph normalization maps these to Latin, which triggers the paypal brand impersonation!
+        let (score, reasons) = analyse("https://раураі.сом");
+        assert!(reasons.iter().any(|r| r == "brand_impersonation:paypal"), "got reasons: {:?}", reasons);
+        assert!(score >= 50, "got score: {}", score);
     }
 }
