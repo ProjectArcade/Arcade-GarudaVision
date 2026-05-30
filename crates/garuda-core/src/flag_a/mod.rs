@@ -418,4 +418,24 @@ mod tests {
         assert_eq!(score, 100);
         assert!(reasons.iter().any(|r| r == "malicious_blocklist_match"));
     }
+
+    #[test]
+    fn portfolio_me_domain_is_clean() {
+        setup_brand_rules();
+        let (score, reasons) = analyse("https://abhinav.me");
+        assert_eq!(score, 0, "Expected clean portfolio domain, got score: {}, reasons: {:?}", score, reasons);
+        let verdict = score_to_verdict(score, reasons);
+        assert!(matches!(verdict.verdict, Verdict::Clean));
+    }
+
+    #[test]
+    fn verify_me_domain_is_flagged_but_not_blocked() {
+        setup_brand_rules();
+        let (score, reasons) = analyse("https://verify.me");
+        assert!(reasons.iter().any(|r| r == "brand_impersonation:veriff"), "expected brand_impersonation:veriff, got: {:?}", reasons);
+        assert!(reasons.iter().any(|r| r == "suspicious_keyword:verify"), "expected suspicious_keyword:verify, got: {:?}", reasons);
+        assert!(score >= 50 && score < 80, "Expected caution score (50-79) for verify.me, got: {}", score);
+        let verdict = score_to_verdict(score, reasons);
+        assert!(matches!(verdict.verdict, Verdict::Caution));
+    }
 }

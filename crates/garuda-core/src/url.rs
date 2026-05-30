@@ -29,6 +29,7 @@ pub struct BrandMatch {
     pub risk: u8,
     pub confidence: f32,
     pub match_type: MatchType,
+    pub matched_token: String,
 }
 
 #[derive(Debug, Clone)]
@@ -250,6 +251,16 @@ pub fn find_brand_matches(host: &str) -> Vec<BrandMatch> {
     matches
 }
 
+pub fn is_generic_keyword(token: &str) -> bool {
+    const GENERIC_KEYWORDS: &[&str] = &[
+        "recovery", "seed", "mnemonic", "wallet", "private", "otp", "kyc", "aadhaar", "aadhar", "pan",
+        "login", "verify", "verification", "account", "auth", "payment", "banking", "netbanking", "refund",
+        "billing", "support", "confirm", "secure", "update", "signin", "authenticate", "credential",
+        "security", "portal", "check", "upgrade", "premium", "business", "bluebadge",
+    ];
+    GENERIC_KEYWORDS.contains(&token)
+}
+
 fn match_rule_tokens(host: &str, tokens: &[String], rule: &BrandRule) -> Option<BrandMatch> {
     let canonical = rule.canonical.to_lowercase();
     let alias_values: Vec<String> = rule.aliases.iter().map(|alias| alias.to_lowercase()).collect();
@@ -262,27 +273,27 @@ fn match_rule_tokens(host: &str, tokens: &[String], rule: &BrandRule) -> Option<
         }
 
         if token == &canonical {
-            return Some(build_match(rule, MatchType::Exact, 1.0));
+            return Some(build_match(rule, MatchType::Exact, 1.0, token.clone()));
         }
 
         if alias_values.iter().any(|alias| alias == token) {
-            return Some(build_match(rule, MatchType::Alias, 0.95));
+            return Some(build_match(rule, MatchType::Alias, 0.95, token.clone()));
         }
 
         if token.len() >= 4 {
             let token_norm = normalize_token(token);
             if token_norm == canonical_norm && token != &canonical {
-                return Some(build_match(rule, MatchType::Normalized, 0.92));
+                return Some(build_match(rule, MatchType::Normalized, 0.92, token.clone()));
             }
 
             if alias_norms.iter().any(|alias| alias == &token_norm) {
-                return Some(build_match(rule, MatchType::Normalized, 0.9));
+                return Some(build_match(rule, MatchType::Normalized, 0.9, token.clone()));
             }
 
             let (homoglyph, changed) = normalize_homoglyphs_with_flags(token);
             if changed {
                 if homoglyph == canonical || alias_values.iter().any(|alias| alias == &homoglyph) {
-                    return Some(build_match(rule, MatchType::Homoglyph, 0.85));
+                    return Some(build_match(rule, MatchType::Homoglyph, 0.85, token.clone()));
                 }
             }
         }
@@ -291,7 +302,7 @@ fn match_rule_tokens(host: &str, tokens: &[String], rule: &BrandRule) -> Option<
             let token_norm = normalize_token(token);
             if let Some(distance) = strict_levenshtein_match(&token_norm, &canonical_norm) {
                 let confidence = if distance == 1 { 0.82 } else { 0.80 };
-                return Some(build_match(rule, MatchType::TypoDistance, confidence));
+                return Some(build_match(rule, MatchType::TypoDistance, confidence, token.clone()));
             }
         }
     }
@@ -299,7 +310,7 @@ fn match_rule_tokens(host: &str, tokens: &[String], rule: &BrandRule) -> Option<
     None
 }
 
-fn build_match(rule: &BrandRule, match_type: MatchType, confidence: f32) -> BrandMatch {
+fn build_match(rule: &BrandRule, match_type: MatchType, confidence: f32, matched_token: String) -> BrandMatch {
     BrandMatch {
         brand: rule.canonical.to_string(),
         domain: rule.domain.to_string(),
@@ -307,6 +318,7 @@ fn build_match(rule: &BrandRule, match_type: MatchType, confidence: f32) -> Bran
         risk: rule.risk,
         confidence,
         match_type,
+        matched_token,
     }
 }
 
@@ -440,11 +452,29 @@ fn is_noise_token(token: &str, host: &str) -> bool {
     const NOISE: &[&str] = &[
         "com", "org", "net", "in", "co", "io", "ai", "app", "dev", "gov", "edu", "nic",
         "ac", "res", "www", "vercel", "pages", "netlify", "web", "firebaseapp",
-        "onrender", "herokuapp", "appspot", "cloud", "click",
+        "onrender", "herokuapp", "appspot", "cloud", "click", "me", "us", "to", "la",
+        "it", "by", "do", "so", "my", "is", "ru", "cn", "xyz", "info", "mobi", "ga", "tv", "fm",
     ];
 
     if NOISE.contains(&token) {
         return true;
+    }
+
+    // Check if the token matches the TLD extension of the host (the last label)
+    if let Some(tld) = host.split('.').last() {
+        if token == tld {
+            return true;
+        }
+    }
+    
+    // Check for double TLDs (e.g., .co.uk, .co.in, .gov.in)
+    let labels: Vec<&str> = host.split('.').collect();
+    if labels.len() >= 3 {
+        let tld = labels[labels.len() - 1];
+        let sub_tld = labels[labels.len() - 2];
+        if (token == tld || token == sub_tld) && (tld == "uk" || tld == "in" || tld == "jp" || tld == "kr" || tld == "br" || tld == "ru" || tld == "tr" || tld == "za" || tld == "cn" || tld == "id" || tld == "pk" || tld == "bd" || tld == "ae") {
+            return true;
+        }
     }
 
     is_platform_label(token, host)
@@ -737,8 +767,12 @@ pub fn analyze_context(
     let verify_keywords = &["verify", "verification", "confirm"];
     let otp_keywords = &["otp", "one-time", "onetime"];
 
-    let has_brand = !brand_matches.is_empty()
-        || reasons.iter().any(|r| r.contains("brand_impersonation"));
+    let has_brand = brand_matches.iter().any(|m| {
+        !(matches!(m.match_type, MatchType::TypoDistance) && is_generic_keyword(&m.matched_token))
+    }) || (reasons.iter().any(|r| r.contains("brand_impersonation")) && !brand_matches.iter().any(|m| {
+        matches!(m.match_type, MatchType::TypoDistance) && is_generic_keyword(&m.matched_token)
+    }));
+
     let has_financial_keyword = financial_keywords.iter().any(|kw| combined.contains(kw));
     let has_auth_keyword = auth_keywords.iter().any(|kw| combined.contains(kw));
     let has_crypto_keyword = crypto_keywords.iter().any(|kw| combined.contains(kw));
@@ -750,7 +784,8 @@ pub fn analyze_context(
     let has_free_hosting = reasons.iter().any(|r| r.contains("free_platform") || r.contains("suspicious_hosting"));
 
     let brand_name = brand_matches
-        .first()
+        .iter()
+        .find(|m| !(matches!(m.match_type, MatchType::TypoDistance) && is_generic_keyword(&m.matched_token)))
         .map(|item| item.brand.clone())
         .or_else(|| {
             reasons
@@ -759,8 +794,17 @@ pub fn analyze_context(
                 .and_then(|r| r.split(':').nth(1).map(|s| s.to_string()))
         });
 
-    let brand_categories = brand_matches.iter().map(|item| item.category.clone()).collect();
-    let brand_risk = brand_matches.iter().map(|item| item.risk).max();
+    let brand_categories = brand_matches
+        .iter()
+        .filter(|m| !(matches!(m.match_type, MatchType::TypoDistance) && is_generic_keyword(&m.matched_token)))
+        .map(|item| item.category.clone())
+        .collect();
+
+    let brand_risk = brand_matches
+        .iter()
+        .filter(|m| !(matches!(m.match_type, MatchType::TypoDistance) && is_generic_keyword(&m.matched_token)))
+        .map(|item| item.risk)
+        .max();
 
     SuspiciousContext {
         has_brand,

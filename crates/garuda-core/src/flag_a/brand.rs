@@ -29,14 +29,17 @@ pub fn check(url: &str) -> BrandCheckResult {
                 rule.aliases.iter().map(|a| a.to_lowercase()).collect();
             
             let mut matched_token = false;
+            let mut matched_token_str = String::new();
             let mut is_alias = false;
             for token in &tokens {
                 let token_lower = token.to_lowercase();
                 if token_lower == canonical_lower {
                     matched_token = true;
+                    matched_token_str = token.clone();
                     break;
                 } else if alias_lowers.iter().any(|a| *a == token_lower) {
                     matched_token = true;
+                    matched_token_str = token.clone();
                     is_alias = true;
                     break;
                 }
@@ -55,6 +58,7 @@ pub fn check(url: &str) -> BrandCheckResult {
                     risk: rule.risk,
                     confidence: 0.7,
                     match_type,
+                    matched_token: matched_token_str,
                 });
                 is_path_match = true;
             }
@@ -120,6 +124,14 @@ fn match_type_priority(t: &MatchType) -> u8 {
 }
 
 fn match_score(brand_match: &BrandMatch) -> u8 {
+    // If it's a TypoDistance match on a generic keyword (e.g. verify -> veriff),
+    // cap the base score and risk boost so that it flags as Caution, but does NOT block.
+    if matches!(brand_match.match_type, MatchType::TypoDistance) && url::is_generic_keyword(&brand_match.matched_token) {
+        let base = 30u8;
+        let risk_boost = ((brand_match.risk as f32) * 0.2).round() as u8;
+        return base.saturating_add(risk_boost);
+    }
+
     let base: u8 = match brand_match.match_type {
         MatchType::Exact => 45,
         MatchType::Alias => 45,
