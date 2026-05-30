@@ -71,4 +71,6 @@ cargo run -p garuda-cli -- check "https://www.rnicrosoft.com/login"
 ---
 
 ## 7. License
-This project is licensed under the **GNU General Public License**.
+This project is licensed under the **GNU Affero General Public License v3 (AGPL-3.0)**. The AGPL-3.0 is a strong copyleft license requiring anyone who uses or modifies this software—specifically including running it as a network service or SaaS offering—to make their complete source code publicly available under the same license terms. See the [LICENSE](LICENSE) file for the full terms and conditions.
+
+
